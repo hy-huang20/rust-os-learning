@@ -2,6 +2,17 @@
 
 总体的计划安排 [实时更新中](#20250611)
 
+## 20250827
+
+### 进度
+
+- 看 [Risc-V Extension N Implementation](https://gallium70.github.io/rv-n-ext-impl/intro.html)，尚未完成
+
+### 下周
+
+- 完成上述文档阅读，并整理报告
+- 看 rCore-N/user/ 中的 user_uart.rs 源码
+
 ## 20250820
 
 ### 进度
