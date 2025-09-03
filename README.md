@@ -7,15 +7,15 @@
 ### 进度
 
 - Embassy 总结
-    - 进行中。参考赵方亮的 Embassy 学习[笔记](https://github.com/zflcs/learning/blob/main/notes/embassy%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0.md)
-    - 思路是以此为大纲进行自己的补充
+    - [Embassy 代码注释与执行流程](https://github.com/hy-huang20/rust-os-learning/tree/main/%E8%BF%87%E7%A8%8B%E8%AE%B0%E5%BD%95/rust/rust%E5%BC%82%E6%AD%A5/Embassy)，已完成
+    - 参考赵方亮的 Embassy 学习[笔记](https://github.com/zflcs/learning/blob/main/notes/embassy%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0.md)，后续以此为大纲进行自己的补充
 - rCore-N 中的 timer 用 embassy timer 代替，能够在 qemu 工作
     - 进行中，[实验过程](https://github.com/hy-huang20/rust-os-learning/tree/main/%E8%BF%87%E7%A8%8B%E8%AE%B0%E5%BD%95/%E5%A4%8D%E7%8E%B0%E8%BF%87%E7%A8%8B/rCore-N%5BQEMU%5D/code)。思路是根据林晨的 uart-crate [记录](https://github.com/BITcyman/Rust-os-learning/blob/main/driver/uart-crate.md) 进行复现
 
 ### 下周
 
 - Embassy 总结一份记录
-    - 以赵方亮学习笔记为大纲，对细节进行注释
+    - 以赵方亮学习笔记为大纲，对其中细节进行注释
 - rCore-N + Embassy
     - 移除 rCore-N 中的异步串口逻辑，改用独立 crate 代替并跑通
     - 使用 Embassy 运行时改进独立 crate 逻辑并跑通
