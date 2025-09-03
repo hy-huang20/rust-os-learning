@@ -10,8 +10,11 @@
 
 ### 下周
 
-- 完成上述文档阅读，并整理报告
-- 看 rCore-N/user/ 中的 user_uart.rs 源码
+- embassy timer 怎么工作
+    - 整理文档
+    - 代码对应关系
+    - 程序验证
+- rCore-N 中的 timer 用 embassy timer 代替，能够在 qemu 工作
 
 ## 20250820
 
