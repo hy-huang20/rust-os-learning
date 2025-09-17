@@ -2,6 +2,25 @@
 
 总体的计划安排 [实时更新中](#20250611)
 
+## 20250917
+
+### 进度
+
+- Embassy 总结
+    - 根据赵方亮的 Embassy 学习记录形成的[初稿](https://github.com/hy-huang20/rust-os-learning/blob/main/%E8%BF%87%E7%A8%8B%E8%AE%B0%E5%BD%95/rust/rust%E5%BC%82%E6%AD%A5/Embassy/readme.md)
+- 理清林晨的实现思路
+    - 划分为 5 个[步骤](https://github.com/hy-huang20/rust-os-learning/blob/main/%E8%BF%87%E7%A8%8B%E8%AE%B0%E5%BD%95/%E5%A4%8D%E7%8E%B0%E8%BF%87%E7%A8%8B/rCore-N%5BQEMU%5D/readme.md)
+    - 复现了第 1 步，第 2 步的 async-uart-driver crate 已有林晨的现成代码
+
+### 下周
+
+- 继续之前的工作
+    - rCore-N 中的 timer 用 embassy timer 代替，能够在 qemu 工作
+    - 对应林晨实现思路中的第 4 步
+    - 任务
+        - 把林晨的 async-uart-driver 在 rCore-N 中跑起来
+        - 研究用 embassy 改进 async-uart-driver 并跑起来
+
 ## 20250903
 
 ### 进度
