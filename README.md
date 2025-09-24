@@ -2,6 +2,17 @@
 
 总体的计划安排 [实时更新中](#20250611)
 
+## 20250924
+
+### 进度
+
+- 进行中：研究怎么抽离 rCore-N 中的 BufferedSerial 和 AsyncSerial 并使用独立的 [async-uart-driver](https://github.com/BITcyman/async-uart-driver/tree/main) crate 并跑通
+
+### 下周
+
+- 研究怎么将 embassy 引入 rCore-N 并实现
+    - 找到了一篇记录：[参考](https://github.com/lighkLife/rcore-blog/issues/1)
+
 ## 20250917
 
 ### 进度
