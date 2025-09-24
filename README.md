@@ -10,6 +10,7 @@
 
 ### 下周
 
+- 了解 [embedded_hal_nb](https://github.com/BITcyman/Rust-os-learning/blob/main/driver/uart-crate.md#embedded_hal_nb) 的作用
 - 研究怎么将 embassy 引入 rCore-N 并实现
     - 找到了一篇记录：[参考](https://github.com/lighkLife/rcore-blog/issues/1)
 
