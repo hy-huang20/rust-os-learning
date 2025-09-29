@@ -10,7 +10,7 @@
 
 ### 下周
 
-- 了解 [embedded_hal_nb](https://github.com/BITcyman/Rust-os-learning/blob/main/driver/uart-crate.md#embedded_hal_nb) 的作用
+- 了解 lc 文档中 [embedded_hal_nb](https://github.com/BITcyman/Rust-os-learning/blob/main/driver/uart-crate.md#embedded_hal_nb) 的作用
 - 研究怎么将 embassy 引入 rCore-N 并实现
     - 找到了一篇记录：[参考](https://github.com/lighkLife/rcore-blog/issues/1)
 
@@ -298,8 +298,9 @@ embassy 学习[过程记录](https://github.com/hy-huang20/rust-os-learning/tree
             - [参考](https://github.com/BITcyman/Rust-os-learning/blob/main/Vision_Five2.md)
         - 已有的工作
             - QEMU 上，异步串口驱动在 AlienOS 中使用 [最新记录](https://github.com/BITcyman/Rust-os-learning/blob/main/driver/runtime.md)
-                >将多创建的基址在 0x10005000 上的串口绑定到一个终端上，目前能够看到从串口中输出的 ABC 字符串，但在终端中向串口中输入字符时，唤醒 串口读协程 出错。目前在找bug。又遇到多个bug。
-            - **未实现**板子上的异步串口驱动
+            - **已实现** QEMU 中跑 AlienOS 异步串口驱动，**已实现** AlienOS 上板，**未实现** AlienOS 异步串口驱动上板
+                - 以下内容摘抄自[林晨论文](https://github.com/BITcyman/Rust-os-learning/blob/main/report/10007_%E8%B7%A8%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%9A%84%E5%BC%82%E6%AD%A5%E4%B8%B2%E5%8F%A3%E9%A9%B1%E5%8A%A8%E6%A8%A1%E5%9D%97%E8%AE%BE%E8%AE%A1%E4%B8%8E%E5%AE%9E%E7%8E%B0.pdf)第 6 章总结和展望：
+                    >没有在星光二实体板上进行适配。虽然当前 Alien 操作系统已经能够在板子上成功运行，但是实际的开发板和虚拟机情况存在一些不同：在 QEMU 模拟的虚拟 qemu-system-riscv64 中，我们不仅可以将几个虚拟串口的输入输出重定向到几个终端上，这样就可以对串口输出进行比较简单的可视化，并且使用该终端向串口中输入数据，并且由于具有多个串口，我们可以在某一个串口上使用原本 Alien 中的串口驱动实现，在另一个串口上使用我们实现的异步串口驱动；而在星光二 Vision Five2 开发板上启动 Alien 时使用的与 Ubuntu 进行通信的串口为默认串口，并且开发板上默认只开启一个串口。如果想要开启多串口，就需要修改硬件配置，同时使用更多的串口线连接开发板。
     - 实现：块设备驱动
         - QEMU，开发板
         - 了解不足，还需学习调研
