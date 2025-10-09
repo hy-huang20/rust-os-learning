@@ -1,5 +1,35 @@
 # 跑 rCore-N
 
+## 更新-20251009
+
+过程记录：
+
+```
+su
+git clone https://github.com/hy-huang20/rCore-N.git
+git clone https://github.com/duskmoon314/qemu.git
+mkdir qemu-build
+cd qemu-build
+../qemu/configure --target-list="riscv64-softmmu"
+make -j8
+
+cd ..
+cd rCore-N/
+git checkout mydev
+# 如果提示版本问题，可能是 just 版本太新了
+cargo install just --version 1.14.0
+cd os
+rustup target add riscv64imac-unknown-none-elf
+# 如果碰到 lock_api 问题，可根据输出提示进行依赖降级
+# 个人尝试还需要修改 user/Cargo.toml 文件依赖
+# 在 [dependencies] 下加一行 lock_api = "=0.4.10"
+cargo update -p lock_api --precise 0.4.10
+
+LOG=DEBUG just run
+# 这时应该会遇到林晨记录中所说的执行 qemu 报串口错误
+# 即林晨记录中图片里面的第 4 步。照做林晨的步骤
+```
+
 ## 资料
 
 - rCore-N 仓库地址：
