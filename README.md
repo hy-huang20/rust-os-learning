@@ -14,7 +14,8 @@
 
 ### 下周
 
-- 解决环境问题，embassy into rcore
+- 解决环境问题，先把 ch9 跑起来
+- 将 embassy 引入 ch9
 
 ## 20250924
 
