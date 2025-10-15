@@ -2,6 +2,20 @@
 
 总体的计划安排 [实时更新中](#20250611)
 
+## 20251015
+
+### 进度
+
+- 在本地成功运行 rCore-N
+- 在 embassy 引入 rCore-Tutorial-v3/ch9 时遇到 bug
+    - 使用 docker 运行 rCore：make build_docker
+        - 网络问题：已解决
+        - input/output error
+
+### 下周
+
+- 解决环境问题，embassy into rcore
+
 ## 20250924
 
 ### 进度
