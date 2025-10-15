@@ -1,5 +1,9 @@
 # 跑 rCore-N
 
+## 更新-20251015
+
+我的 rCore-N 成功运行[对应 commit](https://github.com/hy-huang20/rCore-N/commit/ed76dd59a7596158954c8b1ae358c400d5eadca6)。
+
 ## 更新-20251009
 
 过程记录：
