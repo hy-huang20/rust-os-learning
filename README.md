@@ -2,6 +2,20 @@
 
 总体的计划安排 [实时更新中](#20250611)
 
+## 20251022
+
+### 进度
+
+- 解决 docker 环境问题，成功运行 rCore-Tutorial-v3/ch9
+    - 在 embassy into rcore 时遇到问题 
+- 学习 rCore-2025S 与 rCore-N 的 timer 的区别
+    - rCore-N 允许用户程序设置 timer
+
+### 下周
+
+- 成功将 embassy 引入 rcore
+- rCore-N 的用户态中断机制
+
 ## 20251015
 
 ### 进度
@@ -16,6 +30,7 @@
 
 - 解决环境问题，先把 ch9 跑起来
 - 将 embassy 引入 ch9
+- rCore-N 中的 timer 参照 embassy 改成异步
 
 ## 20250924
 
