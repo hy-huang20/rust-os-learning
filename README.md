@@ -6,15 +6,18 @@
 
 ### 进度
 
-- 解决 docker 环境问题，成功运行 rCore-Tutorial-v3/ch9
-    - 在 embassy into rcore 时遇到问题 
-- 学习 rCore-2025S 与 rCore-N 的 timer 的区别
-    - rCore-N 允许用户程序设置 timer
+||进度|状态|备注|
+|---|---|---|---|
+|1|运行 rCore-Tutorial-v3/ch9|[已完成](https://github.com/hy-huang20/rust-os-learning/commit/eeca2d9efb6de822820e1e9c44d7d393add17eae)|解决了 docker 环境问题|
+|2|在 embassy into rcore 时遇到问题|[进行中](https://github.com/hy-huang20/rust-os-learning/commit/e2135557270df8dfad022a2e38887cfa3d6d0f87)||
+|3|学习 rCore-2025S 与 rCore-N 的 timer 的区别|[已完成](https://github.com/hy-huang20/rust-os-learning/commit/e8fb47c9794b43092ba56fc7ce51ac25224d8405)|rCore-N 允许**用户**程序设置 timer|
 
 ### 下周
 
-- 成功将 embassy 引入 rcore
-- rCore-N 的用户态中断机制
+||计划|备注|
+|---|---|---|
+|1|将 embassy 引入 rcore|解决编译错误|
+|2|把 rCore-N timer 改成异步的|复习协程|
 
 ## 20251015
 
