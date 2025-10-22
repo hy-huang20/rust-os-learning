@@ -162,7 +162,7 @@ pub fn trap_handler() -> ! {
                         sip::set_utimer();
                     }
                 } else { // 当前 timer 由另外进程设置并中断了当前进程
-                    // 往当前进程的 UserTrapQueue 中 enqueue 一条 UserTrapRecord
+                    // 往另外进程的 UserTrapQueue 中 enqueue 一条 UserTrapRecord
                     let _ = push_trap_record(
                         pid,
                         UserTrapRecord {
