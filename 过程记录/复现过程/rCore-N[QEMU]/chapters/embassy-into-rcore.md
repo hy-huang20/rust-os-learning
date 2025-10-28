@@ -6,6 +6,8 @@
 
 将 embassy 引入 rCore-Tutorial-v3/ch9，参考这篇[记录](https://github.com/lighkLife/rcore-blog/issues/1)。
 
+我的成功运行的[仓库 commit](https://github.com/hy-huang20/rCore-Tutorial-v3/commit/a345ccf1cda80c2c69f0f88628f6ac4a56ab2b3e)。
+
 ## 2. 遇到的问题
 
 ### 2.1. item does not constrain `Fut::{opaque#0}`, but has it in its signature
