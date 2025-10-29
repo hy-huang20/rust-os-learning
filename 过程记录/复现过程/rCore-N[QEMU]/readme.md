@@ -6,6 +6,8 @@
 
 - [跑 rCore-Tutorial-v3](./chapters/run-rCore-turorial-v3.md)
 
+- [embassy into rCore-Tutorial-v3](./chapters/embassy-into-rcore.md)
+
 ## 概述
 
 林晨的[记录](https://github.com/BITcyman/Rust-os-learning/blob/main/driver/uart-crate.md)中的实验过程：
