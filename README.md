@@ -2,6 +2,22 @@
 
 总体的计划安排 [实时更新中](#20250611)
 
+## 20251029
+
+### 进度
+
+||任务|状态|备注|
+|---|---|---|---|
+|1|[将 embassy 引入 rcore](https://github.com/hy-huang20/rCore-Tutorial-v3/issues/1)|[已完成](https://github.com/hy-huang20/rCore-Tutorial-v3/commit/a345ccf1cda80c2c69f0f88628f6ac4a56ab2b3e)|[复现记录](https://github.com/hy-huang20/rust-os-learning/blob/main/%E8%BF%87%E7%A8%8B%E8%AE%B0%E5%BD%95/%E5%A4%8D%E7%8E%B0%E8%BF%87%E7%A8%8B/rCore-N%5BQEMU%5D/chapters/embassy-into-rcore.md)|
+|2|[将 embassy 引入 rcoren](https://github.com/hy-huang20/rCore-N/issues/1)|进行中|出现[问题](https://github.com/hy-huang20/rust-os-learning/blob/main/%E8%BF%87%E7%A8%8B%E8%AE%B0%E5%BD%95/%E5%A4%8D%E7%8E%B0%E8%BF%87%E7%A8%8B/rCore-N%5BQEMU%5D/chapters/embassy-into-rcoren.md)|
+
+### 下周
+
+||计划|备注|
+|---|---|---|
+|1|将 embassy 引入 rcoren|解决依赖问题|
+|2|rCoreN 的 timer 改成异步|没太想明白改动哪里|
+
 ## 20251022
 
 ### 进度
