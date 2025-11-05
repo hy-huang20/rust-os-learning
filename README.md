@@ -2,6 +2,20 @@
 
 总体的计划安排 [实时更新中](#20250611)
 
+## 20251105
+
+### 进度
+
+||任务|状态|备注|
+|---|---|---|---|
+|1|[rCoreN 的 timer 改成异步](https://github.com/hy-huang20/rust-os-learning/issues/21)|进行中|改 sys_set_timer 还是 user_lib 的疑问|
+
+### 下周
+
+||计划|备注|
+|---|---|---|
+|1|[rCoreN 的 timer 改成异步](https://github.com/hy-huang20/rust-os-learning/issues/21)|验证想法是否正确|
+
 ## 20251029
 
 ### 进度
