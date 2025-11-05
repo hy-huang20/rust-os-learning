@@ -1,4 +1,39 @@
-# embassy_time::Timer 源码
+# embassy_time::Timer
+
+## 更新：关于将 rCore-N timer 改成异步
+
+embassy/embassy_time 包提供了三种驱动。但是将 rCore-N timer 改成异步本质上是在**内核**中写代码，因此之前学习的 driver_std 的实现无法移植，因为 driver_std 依赖于 rust 的 std 库实现，而 std 库依赖于底层主流操作系统的支持。如果需要在 rCore-N 中引入类似于 embassy 的 timer 模式，需要在 rCore-N 的基础上实现自己的 time driver，重点在于以下两步：
+
+- 将 timer 逻辑封装并实现为 Future
+
+    ```rust
+    use core::future::Future;
+
+    impl Future for Timer {
+        fn poll(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Self::Output> {
+            // TODO
+        }
+    }
+    ```
+- 提供一个 MyDriver，将其实现为 Driver
+
+    ```rust
+    use embassy_time_driver::Driver;
+
+    impl MyDriver for Driver {
+        fn now(&self) -> u64 {
+            // TODO
+        }
+
+        fn schedule_wake(&self, at: u64, waker: &core::task::Waker) {
+            // TODO
+        }
+    }
+    ```
+
+其它的细节参考以下的源码部分。
+
+## 源码
 
 我在 [embassy-learning](https://github.com/hy-huang20/rust-learning/tree/embassy-learning/embassy-learning) 中使用到了 embassy_time 包中 Timer 中的函数。这里分析一下使用的 Timer 中函数的调用过程，以 ``Timer::after_secs()`` 为例。
 
