@@ -1,5 +1,26 @@
 # rust async/await feature
 
+## 更新：关于将 rCore-N timer 改成异步
+
+async/await 关键字本质是 rust 语言特性，**不需要 std 环境也可以使用**。但如果是 no_std 环境则需要自己实现一个**运行时**。一般一个运行时会包含以下三个组件：
+
+- Executor
+- Reactor
+- Waker
+
+在 no_std 环境下可以使用 core 库提供的一些功能：
+
+|组件|core 是否提供|在 no_std 环境下|
+|---|---|---|
+|Future trait|core::future::Future|直接可用|
+|Waker|core::task|需要自己实现具体唤醒逻辑|
+|Executor|无|自行实现或第三方库|
+|Reactor|无|自行实现或第三方库|
+
+运行时的三个组件均可以参考 embassy 库进行实现。
+
+# Write an OS in Rust 学习记录
+
 这里是对 Philipp Oppermann 的博客 Write an OS in Rust 中 [async-await 部分](https://os.phil-opp.com/async-await/)的学习记录，博客有繁体中文[翻译版本](https://os.phil-opp.com/zh-TW/async-await/)
 
 ## Multitasking 多任务
