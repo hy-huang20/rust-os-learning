@@ -1,5 +1,9 @@
 # embassy_time::Timer
 
+## 更新：20251105 讨论
+
+将 rCore-N timer 改成异步是改内核中的实现，而之前看的关于 embassy 的内容都是在用户态的（比如依赖于 std 的 embassy_time 相关调用逻辑）。先进一步参考[赵方亮的 embassy 学习记录](https://github.com/zflcs/learning/blob/main/notes/embassy%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0.md)，看有没有什么思路。
+
 ## 更新：关于将 rCore-N timer 改成异步
 
 embassy/embassy_time 包提供了三种驱动。但是将 rCore-N timer 改成异步本质上是在**内核**中写代码，因此之前学习的 driver_std 的实现无法移植，因为 driver_std 依赖于 rust 的 std 库实现，而 std 库依赖于底层主流操作系统的支持。如果需要在 rCore-N 中引入类似于 embassy 的 timer 模式，需要在 rCore-N 的基础上实现自己的 time driver，重点在于以下两步：
