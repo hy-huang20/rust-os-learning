@@ -8,13 +8,14 @@
 
 ||任务|状态|备注|
 |---|---|---|---|
-|1|[rCoreN 的 timer 改成异步](https://github.com/hy-huang20/rust-os-learning/issues/21)|进行中|改 sys_set_timer 还是 user_lib 的疑问|
+|1|[rCoreN 的 timer 改成异步](https://github.com/hy-huang20/rust-os-learning/issues/21)|进行中|之前误认为需要[改用户态的 user_lib](https://github.com/hy-huang20/rust-os-learning/commit/6f7270ba16f770e27a95603eaa046e15970d6ed2)|
 
 ### 下周
 
 ||计划|备注|
 |---|---|---|
-|1|[rCoreN 的 timer 改成异步](https://github.com/hy-huang20/rust-os-learning/issues/21)|验证想法是否正确|
+|1|embassy timer 继续学习|<ul><li>之前的[学习](https://github.com/hy-huang20/rust-os-learning/commit/04c7b46e1e3dcbc120fd402e4020637898667b5f)局限于用户态逻辑，需要在 embassy 代码中找到更加有帮助的代码部分</li><li>可以先把[赵方亮的 embassy 学习记录](https://github.com/zflcs/learning/blob/main/notes/embassy%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0.md)对着代码看明白。这份学习记录主要分析了 [embassy-stm32](https://github.com/embassy-rs/embassy/tree/main/embassy-stm32) 中的代码</li><ul>|
+|2|[rCoreN 的 timer 改成异步](https://github.com/hy-huang20/rust-os-learning/issues/21)|把 embassy timer 模式引入内核，明确需要改哪里|
 
 ## 20251029
 
