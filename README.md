@@ -2,6 +2,20 @@
 
 总体的计划安排 [实时更新中](#20250611)
 
+## 20251112
+
+### 进度
+
+||任务|状态|备注|
+|---|---|---|---|
+|1|[embassy timer 继续学习](https://github.com/hy-huang20/rust-os-learning/issues/22)|[进行中](https://github.com/hy-huang20/rust-os-learning/commit/4d548e74d79535400ba0ebe3a7b4db688029ad9f)|学习了支持 cortex_m 的 executor|
+
+### 下周
+
+||计划|备注|
+|---|---|---|
+|1|[rCoreN 的 timer 改成异步](https://github.com/hy-huang20/rust-os-learning/issues/21)|参考 embassy 的模式|
+
 ## 20251105
 
 ### 进度
