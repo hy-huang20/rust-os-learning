@@ -8,13 +8,14 @@
 
 ||任务|状态|备注|
 |---|---|---|---|
-|1|[embassy timer 继续学习](https://github.com/hy-huang20/rust-os-learning/issues/22)|[进行中](https://github.com/hy-huang20/rust-os-learning/commit/4d548e74d79535400ba0ebe3a7b4db688029ad9f)|学习了支持 cortex_m 的 executor|
+|1|[embassy timer 继续学习](https://github.com/hy-huang20/rust-os-learning/issues/22)|[已完成](https://github.com/hy-huang20/rust-os-learning/commit/27c019325097cc4a81b3d2a65daaeec8f2ec4b26)|学习了支持 cortex_m 的 executor|
 
 ### 下周
 
 ||计划|备注|
 |---|---|---|
-|1|[rCoreN 的 timer 改成异步](https://github.com/hy-huang20/rust-os-learning/issues/21)|参考 embassy 的模式|
+|1|规划未来毕设的计划|下周例会讨论|
+|2|[rCoreN 的 timer 改成异步](https://github.com/hy-huang20/rust-os-learning/issues/21)|照着林晨的 [async_uart_driver](https://github.com/BITcyman/async-uart-driver/tree/main) 改|
 
 ## 20251105
 
