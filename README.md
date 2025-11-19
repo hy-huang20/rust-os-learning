@@ -10,11 +10,11 @@
 |---|---|---|---|
 |1|学习 rCore-N uart 源码并与林晨的 async-uart-driver 比较|一周后|后者基于前者开发并借鉴 Embassy 模式|
 |2|移除 rCore-N 中的 uart.rs 并引入林晨的 async-uart-driver 运行|12 月初|async-uart-driver 是一个独立 Crate|
-|3|在 QEMU 中把 AlienOS 跑起来||可能需要简单了解 AlienOS 并学会使用 QEMU|
+|3|在 QEMU 中把 AlienOS 跑起来|12 月中|可能需要简单了解 AlienOS 并学会使用 QEMU|
 |4|把林晨的 async-uart-driver 用到 QEMU 上运行的 AlienOS 中|开题前|验证所实现的异步串口能够**跨操作系统**。复现工作的最后一步|
-|5|学习如何使用星光二开发板||学习星光二板子上已有的 [PAC](https://codeberg.org/weathered-steel/jh71xx-pac) 和 [HAL](https://codeberg.org/weathered-steel/jh71xx-hal)|
+|5|学习如何使用星光二开发板|下学期开学前|学习星光二板子上已有的 [PAC](https://codeberg.org/weathered-steel/jh71xx-pac) 和 [HAL](https://codeberg.org/weathered-steel/jh71xx-hal)|
 |6|把第 4 步从 QEMU 移植到星光二开发板上|下学期开学前|QEMU 相较星光二的便捷：<ul><li>串口可以重定向到窗口从而能够可视化</li><li>默认可以有多个串口</li></ul>|
-|7|异步块设备驱动||缺乏前期调研，需要在学习了解的基础上进行后续计划|
+|7|异步块设备驱动|开题前调研|缺乏前期调研，需要在学习了解的基础上进行后续计划|
 
 ### 下周
 
