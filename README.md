@@ -2,6 +2,20 @@
 
 总体的计划安排 [实时更新中](#20250611)
 
+## 20251231
+
+### 进度
+
+||任务|状态|备注|
+|---|---|---|---|
+|1|[学习 rcoren 的用户态中断机制](https://github.com/hy-huang20/rust-os-learning/issues/18)|已完成|主要理清了 utimer 的执行逻辑<ul><li>[rcoren-timer.md](https://github.com/hy-huang20/rust-os-learning/commit/1cf41f56dbd0268d908d2e96e33fc0fba9b57f22)</li><li>[usertrap.md](https://github.com/hy-huang20/rust-os-learning/commit/80ad5a18911946bceac2169f64918bfef957a9b0)</li></ul>|
+
+### 下周
+
+||计划|备注|
+|---|---|---|
+|1|||
+
 ## 20251119
 
 ### 毕设规划
