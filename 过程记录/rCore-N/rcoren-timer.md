@@ -29,7 +29,7 @@ pub fn trap_handler() -> ! {
 
 ## 2. rCore-N 和 rCore-2025S
 
-rCore-2025S 的 timer 比较简单，而且只有 os 能设置 timer，主要是 os 用来实现[抢占式分时多任务](https://learningos.cn/rCore-Tutorial-Guide-2025S/chapter3/4time-sharing-system.html)。但 rCore-N 提供了一个系统调用 ``sys_set_timer`` 使得**用户程序**也可以设置 timer。
+rCore-2025S 的 timer 比较简单，而且只有 os 能设置 timer，主要是 os 用来实现[抢占式分时多任务](https://learningos.cn/rCore-Tutorial-Guide-2025S/chapter3/4time-sharing-system.html)。但 rCore-N 提供了一个系统调用 ``sys_set_timer`` 使得**用户程序**也可以设置 timer。这个 timer 是用户程序用来设置在未来某个时间点**中断自己**的。
 
 TODO：概括 sys_set_timer 的功能
 
@@ -154,15 +154,16 @@ pub fn trap_handler() -> ! {
                 if pid == 0 { // os 时间片轮转任务调度
                     set_next_trigger();
                     suspend_current_and_run_next();
-                } else if pid == current_task().unwrap().pid.0 { // 当前 timer 由当前进程设置并中断了当前进程
+                } else if pid == current_task().unwrap().pid.0 { // 当前 timer 由当前任务设置并中断了当前任务
                     // 设置 sip CSR 的 UTIP 字段
                     // 表示一个 U 态的 timer 等待处理
+                    // 也即 U 态的时钟中断就是从这里触发的
                     debug!("set UTIP for pid {}", pid);
                     unsafe {
                         sip::set_utimer();
                     }
-                } else { // 当前 timer 由另外进程设置并中断了当前进程
-                    // 往另外进程的 UserTrapQueue 中 enqueue 一条 UserTrapRecord
+                } else { // 当前 timer 由另外任务设置并中断了当前任务
+                    // 往另外任务的 UserTrapQueue 中 enqueue 一条 UserTrapRecord
                     let _ = push_trap_record(
                         pid,
                         UserTrapRecord {
@@ -179,3 +180,7 @@ pub fn trap_handler() -> ! {
     // ...
 }
 ```
+
+从 os 中的 `trap_handler` 逻辑可以明白，user timer 只会中断设置它的任务，也即**自己设置时钟中断并在未来中断自己**。并且，os 通过 `sip::set_utimer()` 触发一个 U 态的时钟中断，跳转到 `utvec` CSR 指定的地址去执行。[接下来的执行流分析](./usertrap.md#user-trap-handler)。
+
+假设设置这个 utimer 的任务是 A（即上述代码中的 pid 代表的任务），那么如果正好在 A 执行到的时候 A 曾经设置的 utimer 触发了则可以直接跳转到 utvec（即上面判断 pid 的第二个 if-else 分支）；而假如当 A 曾经设置的 utimer 触发时，此时正在执行另外一个任务 B，则 os 会将代表这个 utimer 的 trap_record 通过  `push_trap_record` 放进任务 A 的任务控制块 TCB 中的 `UserTrapInfo` 中的 `UserTrapQueue`。
