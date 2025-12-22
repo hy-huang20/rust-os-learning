@@ -27,6 +27,8 @@
 
 在 os 的 trap_handler 的最后一步调用是 `trap_return` 函数，`trap_return` 会调用 `current_task()`（也就是当前被 os trap 中断的任务）的 tcb inner 中的 `restore_user_trap_info` 函数，检查 `UserTrapInfo` 中的 `UserTrapQueue`，如果非空，则调用 `uip::set_usoft()` 触发“假的”用户态软件中断处理 `UserTrapQueue` 中的 `UserTrapRecord`。
 
+值得注意的是这里的特权级切换。`trap_return` 调用时处于 S 态，在触发用户态中断后会短暂回到 U 态处理用户态中断逻辑，处理完成后会再次回到 S 态的 `trap_return` 函数中，然后 `trap_return` 执行完成后回到被 S 态中断打断前的 U 态代码中去。
+
 #### 用户态外部中断触发
 
 #### 用户态时钟中断触发
