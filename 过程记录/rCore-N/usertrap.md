@@ -2,7 +2,41 @@
 
 ## 操作系统部分：os/
 
-相关代码位于 os/src/trap/usertrap.rs。
+### os/src/trap/usertrap.rs
+
+```rust
+pub struct UserTrapRecord {
+    /// 发起这条 record 的 task 的 pid
+    /// 不过如果是“真的”用户态软中断则为 pid << 4（这样做的目的见下文）
+    pub cause: usize,
+    /// 如果是用户态时钟中断则设置为 get_time_us() 表示用户态中断从硬件触发的时间
+    /// 如果是用户态外部中断则设置为 PLIC 的 irq 编号（标识外部设备）
+    /// 如果是“真的”用户态软中断则具体含义可由用户自定义
+    pub message: usize,
+}
+```
+
+### os/src/syscall/process.rs
+
+和用户态中断相关的几个 syscall：
+
+- `sys_init_user_trap`
+
+    - 调用当前 task 的 tcb inner 的 `init_user_trap` 初始化 `UserTrapQueue`
+
+- `sys_send_msg`
+
+    - 用户态软中断相关
+    - 向目标 task (pid) 的 `UserTrapQueue` 插入一条 `UserTrapRecord`
+    - `UserTrapRecord::cause` 设置为 `pid << 4`，从而保证 `cause & 0xF == 0`，于是通过 `sys_send_msg` 插入的 record 都是“**真的**”用户态软中断，在“真的”用户态软中断中通过 `cause >> 4` 获取发起这条 record 的 task 的 pid
+
+- `sys_set_timer`
+
+    - 用户态时钟中断相关
+    - 提供给用户调用，用户可指定未来的某个时刻打断自己并执行自己提供的 `timer_intr_handler`
+
+- `sys_claim_ext_int`
+- `sys_set_ext_int_enable`
 
 ## 用户程序部分：user/
 
@@ -19,13 +53,13 @@
 
 ### 用户态中断何时何处触发
 
-在 os/src/trap/mod.rs 中的 init 函数中设置了三种中断的 sideleg，可委托给 U 态处理？（理清楚这里的执行逻辑）
+在 os/src/trap/mod.rs 中的 `init` 函数中设置了三种中断的 `sideleg`，可委托给 U 态处理。这个 `init` 函数会在 `rust_main` 中被调用。
 
 #### 用户态软中断触发
 
-触发用户态软中断（“假的”软中断）应该是专门为了处理 `UserTrapQueue` 中的 `UserTrapRecord` 的，而这些 record 中可能包含“真的”软中断。
+触发用户态软中断（“假的”软中断）应该是专门为了处理 `UserTrapQueue` 中的 `UserTrapRecord` 的，而这些 record 中可能包含“真的”软中断。这里的“假的”“真的”的意思是，**实际**的用户态软中断处理工作而不是处理 record 的过程在哪里被执行。
 
-在 os 的 trap_handler 的最后一步调用是 `trap_return` 函数，`trap_return` 会调用 `current_task()`（也就是当前被 os trap 中断的任务）的 tcb inner 中的 `restore_user_trap_info` 函数，检查 `UserTrapInfo` 中的 `UserTrapQueue`，如果非空，则调用 `uip::set_usoft()` 触发“假的”用户态软件中断处理 `UserTrapQueue` 中的 `UserTrapRecord`。
+**每次 os 的 trap_handler 被调用时**，在 os 的 trap_handler 的最后一步调用是 `trap_return` 函数，`trap_return` 会调用 `current_task()`（也就是当前被 os trap 中断的任务）的 tcb inner 中的 `restore_user_trap_info` 函数，检查 `UserTrapInfo` 中的 `UserTrapQueue`，如果非空，则调用 `uip::set_usoft()` 触发“假的”用户态软件中断处理 `UserTrapQueue` 中的 `UserTrapRecord`。
 
 值得注意的是这里的特权级切换。`trap_return` 调用时处于 S 态，在触发用户态中断后会短暂回到 U 态处理用户态中断逻辑，处理完成后会再次回到 S 态的 `trap_return` 函数中，然后 `trap_return` 执行完成后回到被 S 态中断打断前的 U 态代码中去。
 
@@ -64,7 +98,7 @@ static IS_TIMEOUT: AtomicBool = AtomicBool::new(false);
 pub fn main() -> i32 {
     println!("[hello world] from pid: {}", getpid());
     sleep(1000); // 用户程序库提供的忙等 sleep
-    let init_res = init_user_trap(); // 初始化用户态 trap
+    let init_res = init_user_trap(); // 初始化用户态 trap，主要就是初始化 UserTrapQueue
     println!(
         "[hello world] trap init result: {:#x}, now using timer to sleep",
         init_res
@@ -82,7 +116,7 @@ pub fn main() -> i32 {
 }
 
 #[no_mangle]
-pub fn timer_intr_handler(time_us: usize) {
+pub fn timer_intr_handler(time_us: usize) { // 将会覆盖用户程序库中的默认 timer_intr_handler
     println!(
         "[user trap default] user timer interrupt, time (us): {}",
         time_us
