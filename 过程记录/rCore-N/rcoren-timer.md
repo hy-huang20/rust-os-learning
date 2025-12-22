@@ -181,6 +181,6 @@ pub fn trap_handler() -> ! {
 }
 ```
 
-从 os 中的 `trap_handler` 逻辑可以明白，user timer 只会中断设置它的任务，也即**自己设置时钟中断并在未来中断自己**。并且，os 通过 `sip::set_utimer()` 触发一个 U 态的时钟中断，跳转到 `utvec` CSR 指定的地址去执行。[接下来的执行流分析](./usertrap.md#user-trap-handler)。
+从 os 中的 `trap_handler` 逻辑可以明白，user timer 只会中断设置它的任务，也即**自己设置时钟中断并在未来中断自己**。并且，os 通过 `sip::set_utimer()` 触发一个 U 态的时钟中断，跳转到 `utvec` CSR 指定的地址去执行。[接下来的执行流分析](./usertrap.md#用户程序库user-trap-handler)。
 
 假设设置这个 utimer 的任务是 A（即上述代码中的 pid 代表的任务），那么如果正好在 A 执行到的时候 A 曾经设置的 utimer 触发了则可以直接跳转到 utvec（即上面判断 pid 的第二个 if-else 分支）；而假如当 A 曾经设置的 utimer 触发时，此时正在执行另外一个任务 B，则 os 会将代表这个 utimer 的 trap_record 通过  `push_trap_record` 放进任务 A 的任务控制块 TCB 中的 `UserTrapInfo` 中的 `UserTrapQueue`。
