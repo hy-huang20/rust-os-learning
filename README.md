@@ -9,12 +9,14 @@
 ||任务|状态|备注|
 |---|---|---|---|
 |1|[学习 rcoren 的用户态中断机制](https://github.com/hy-huang20/rust-os-learning/issues/18)|已完成|主要理清了 utimer 的执行逻辑<ul><li>[rcoren-timer.md](https://github.com/hy-huang20/rust-os-learning/commit/1cf41f56dbd0268d908d2e96e33fc0fba9b57f22)</li><li>[usertrap.md](https://github.com/hy-huang20/rust-os-learning/commit/da0442566a9f222be0695da07363bfbf6e4ae223)</li></ul>|
+|2|[将 rCore-N timer 改成异步的](https://github.com/hy-huang20/rust-os-learning/issues/21)|进行中|把林晨异步串口的逻辑移植过来，仍存在编译错误|
 
 ### 下周
 
 ||计划|备注|
 |---|---|---|
-|1|||
+|1|[将 rCore-N timer 改成异步的](https://github.com/hy-huang20/rust-os-learning/issues/21)|解决编译错误能跑起来|
+|2|移除 rCore-N 中的 uart.rs 并引入林晨的 async-uart-driver 运行||
 
 ## 20251119
 
