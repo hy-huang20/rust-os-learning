@@ -15,8 +15,9 @@
 
 ||计划|备注|
 |---|---|---|
-|1|[将 rCore-N timer 改成异步的](https://github.com/hy-huang20/rust-os-learning/issues/21)|解决编译错误能跑起来|
-|2|移除 rCore-N 中的 uart.rs 并引入林晨的 async-uart-driver 运行||
+|1|准备开题|更新最新进度|
+|2|[将 rCore-N timer 改成异步的](https://github.com/hy-huang20/rust-os-learning/issues/21)|解决编译错误能跑起来|
+|3|移除 rCore-N 中的 uart.rs 并引入林晨的 async-uart-driver 运行||
 
 ## 20251119
 
