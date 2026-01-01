@@ -27,3 +27,136 @@ waker 调用使内核调度器重新 poll 该 Future
 感觉需要在 os `trap_handler` 中将相应 timer future 中的 timeout 设置为 true 并 wake 所有 wakers
 
 也许可以借助 rcoren 中用户态中断的设计思路，os `trap_handler` 中使用一个“假”的时钟中断。“真”的时钟中断相关的处理逻辑放到各自**对应的 Future 中**去。
+
+## 20251109
+
+rCore-N 中原 timer 实现：
+
+```rust
+// os/src/trap/mod.rs
+pub fn trap_handler() -> ! {
+    match scause.cause() {
+        Trap::Interrupt(Interrupt::SupervisorTimer) => {
+            // do something
+        }
+    }
+    trap_return();
+}
+```
+
+修改后大致的样子：
+
+```rust
+// os/src/trap/mod.rs
+
+pub fn trap_handler() -> ! {
+    match scause.cause() {
+        Trap::Interrupt(Interrupt::SupervisorTimer) => {
+            // 在中断处理例程中 poll 一次执行器
+            timer.executor.poll();
+        }
+    }
+}
+```
+
+```rust
+// os/src/timer.rs
+
+// 无论是 os 的时间片轮转还是 sys_set_timer 系统调用
+// 都会使用 set_virtual_timer 函数
+// 这里使用 async 关键字将其改成异步函数
+pub async fn set_virtual_timer(mut time: usize, pid: usize) {
+    // ...
+
+    // 每个 timer 对应一个 task
+    // 注册 waker
+    let task = Task::new(/*...*/);
+    register_waker(
+        unsafe { from_task(task.clone())}
+    );
+    timer.executor.tasks.push_back(task);
+
+    // ...
+}
+```
+
+此外还要增加一些代码逻辑：
+
+Timer
+
+```rust
+pub struct Timer {
+    wakers,
+    executor,
+}
+```
+
+Executor
+
+```rust
+pub struct Executor {
+    timer_queue,
+    run_queue,
+    tasks,
+}
+
+impl Executor {
+    pub fn poll() {
+        // 1. dequeue_expired 函数将 timer_queue 中
+        // 所有 expired 任务拿出
+        // 2. 对于每个被拿出的 task 通过 wake_task_no_pend 函数
+        // 将其放入 run_queue
+        self.timer_queue.dequeue_expired(wake_task_no_pend);
+
+        // 1. dequeue_all 拿出 run_queue 中的所有任务
+        // 2. 在传入 dequeue_all 的回调函数中执行 poll_fn
+        self.run_queue.dequeue_all(|p| {
+                
+            // do something
+            task.poll_fn()(p);
+
+            self.timer_queue.update(p);
+        });
+    }
+}
+```
+
+Waker
+
+注册 waker 的实现：
+
+```rust
+pub fn register_waker(&self, waker: Waker) {
+    timer.wakers.lock().push_back(waker)
+}
+```
+
+waker.rs 的实现可以照搬 [embassy 的做法](https://github.com/embassy-rs/embassy/blob/main/embassy-executor/src/raw/waker.rs)。林晨的[实现](https://github.com/BITcyman/async-uart-driver/blob/main/src/waker.rs)也是以此为参考的：
+
+```rust
+//! This mod specific the waker related with coroutine
+//!
+
+use super::task::{TaskRef, Task, wake_task};
+use core::task::{RawWaker, RawWakerVTable, Waker};
+
+const VTABLE: RawWakerVTable = RawWakerVTable::new(clone, wake, wake, drop);
+
+unsafe fn clone(p: *const ()) -> RawWaker {
+    RawWaker::new(p, &VTABLE)
+}
+
+/// nop
+unsafe fn wake(p: *const ()) { 
+    wake_task(TaskRef::from_ptr(p as *const Task))
+}
+
+unsafe fn drop(_p: *const ()) {
+    // nop
+}
+
+/// 
+pub(crate) unsafe fn from_task(task_ref: TaskRef) -> Waker {
+    Waker::from_raw(RawWaker::new(task_ref.as_task_raw_ptr() as _, &VTABLE))
+}
+```
