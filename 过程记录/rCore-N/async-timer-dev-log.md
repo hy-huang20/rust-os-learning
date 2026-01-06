@@ -4,6 +4,23 @@
 
 记录追踪开发过程中的想法和实现过程，可能会频繁修改，且**不能**保证所有历史内容的正确性。更新中...
 
+## 20260101
+
+TODO：放上代码仓库的 commit id 对应到代码
+
+之前的设想是，当 timer 触发时，在 os 的 `trap_handler` 中直接修改 `AsyncTask` 的 `AsyncTimerFuture::timeout` 这一 `AtomicBool` 变量，后来发现这在代码上是并不可行的。因为照搬林晨设计的 `Task` struct 而设计的 `AsyncTask` 中：
+
+```rust
+pub struct AsyncTask {
+    /// The task future
+    pub fut: AtomicCell<Pin<Box<dyn Future<Output = ()> + 'static + Send + Sync>>>,
+}
+```
+
+因为无法知道 `fut` 这个 trait 对象的具体类型，所以无法修改。
+
+于是回看林晨代码。如果按照林晨的设计的话，我不应该在我的 `AsyncTimerFuture` 中维护 `timeout` 字段，而是维护一个 `Arc<AsyncTimer>` driver。那该如何知道这个 future 是否 timeout 了呢？我想应该可以在 `AsyncTimer` 中维护相应的数据结构用来记录，然后 future 通过 `AsyncTimer` 提供的方法从而得知自己是否已经 timeout。
+
 ## 20251231
 
 我理解的在内核中编写的异步驱动交互代码执行的一个大致流程：
