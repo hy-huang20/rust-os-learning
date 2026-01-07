@@ -2,11 +2,21 @@
 
 ## 概述
 
+[仓库分支：rCore-N/async-timer](https://github.com/hy-huang20/rCore-N/tree/async-timer)
+
 记录追踪开发过程中的想法和实现过程，可能会频繁修改，且**不能**保证所有历史内容的正确性。更新中...
 
-## 20260101
+## 20260107
 
-TODO：放上代码仓库的 commit id 对应到代码
+[commit id: 8663da0](https://github.com/hy-huang20/rCore-N/commit/8663da00f4ef4c1679071646cabbc7819964c335)
+
+移植林晨的 async-uart-driver 逻辑：**解决了编译错误，目前 os 可以跑起来**
+
+目前还不太明白 rcoren 中的 `hart_id` 的作用
+
+目前的实现可能导致 `AsyncTimerExecutor` 中 `AsyncTask` 的重复，即多个 `AsyncTask` 其实都是服务于一个 `AsyncTimerFuture`，不过目前不影响正常进行，因为在 `AsyncTimer::interrupt_handler()` 中会 wake 所有 `AsyncTask` 为 Ready。后续也许可以参考 write an os in rust 中的做法，建立一个从 `time: usize` 到 `AsyncTask` 的 `BTreeMap`?
+
+## 20260101
 
 之前的设想是，当 timer 触发时，在 os 的 `trap_handler` 中直接修改 `AsyncTask` 的 `AsyncTimerFuture::timeout` 这一 `AtomicBool` 变量，后来发现这在代码上是并不可行的。因为照搬林晨设计的 `Task` struct 而设计的 `AsyncTask` 中：
 
