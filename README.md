@@ -2,6 +2,21 @@
 
 总体的计划安排 [实时更新中](#20250611)
 
+## 20250107
+
+### 进度
+
+||任务|状态|备注|
+|---|---|---|---|
+|1|[将 rCore-N timer 改成异步的](https://github.com/hy-huang20/rust-os-learning/issues/21)|[已完成](https://github.com/hy-huang20/rCore-N/commit/8663da00f4ef4c1679071646cabbc7819964c335)|解决了编译问题，os 可以运行了：[记录](https://github.com/hy-huang20/rust-os-learning/commit/cccd97c186549a06481039693e966fcec36d151e)|
+
+### 下周
+
+||计划|备注|
+|---|---|---|
+|1|准备开题报告|<ul><li>网络所应该是在 20260115-20260116 开题</li><li>更新最新进度</li></ul>|
+|2|移除 rCore-N 中的 uart.rs 并引入林晨的 async-uart-driver 运行|复现|
+
 ## 20251231
 
 ### 进度
@@ -9,7 +24,7 @@
 ||任务|状态|备注|
 |---|---|---|---|
 |1|[学习 rcoren 的用户态中断机制](https://github.com/hy-huang20/rust-os-learning/issues/18)|已完成|主要理清了 utimer 的执行逻辑<ul><li>[rcoren-timer.md](https://github.com/hy-huang20/rust-os-learning/commit/1cf41f56dbd0268d908d2e96e33fc0fba9b57f22)</li><li>[usertrap.md](https://github.com/hy-huang20/rust-os-learning/commit/da0442566a9f222be0695da07363bfbf6e4ae223)</li></ul>|
-|2|[将 rCore-N timer 改成异步的](https://github.com/hy-huang20/rust-os-learning/issues/21)|进行中|把林晨异步串口的逻辑移植过来，仍存在编译错误|
+|2|[将 rCore-N timer 改成异步的](https://github.com/hy-huang20/rust-os-learning/issues/21)|进行中|把林晨 async-uart-driver 的逻辑移植过来，仍存在编译错误|
 
 ### 下周
 
