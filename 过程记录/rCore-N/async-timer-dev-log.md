@@ -6,6 +6,16 @@
 
 记录追踪开发过程中的想法和实现过程，可能会频繁修改，且**不能**保证所有历史内容的正确性。更新中...
 
+## 20260113
+
+[commit id: 8539c43](https://github.com/hy-huang20/rCore-N/commit/8539c43f29775a01c40d1c36fe1e66b5ebd00428)
+
+之前的想法和实现错了。**不要将 os trap_handler 函数实现为 async 的。**
+
+修改的话，首先应该将 trap_handler 和 timer_interrupt_handler 都改为非 async 的，然后将 `AsyncTimer` 中的 get_async_timer 函数改成非 async 的，名称改为 set_async_timer，函数内逻辑不变。
+
+因为之前的想法存在问题，所以可以几乎无视 [20260107](#20260107) 的记录。
+
 ## 20260107
 
 [commit id: 8663da0](https://github.com/hy-huang20/rCore-N/commit/8663da00f4ef4c1679071646cabbc7819964c335)
