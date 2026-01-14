@@ -2,6 +2,22 @@
 
 总体的计划安排 [实时更新中](#20250611)
 
+## 20250114
+
+### 进度
+
+||任务|状态|备注|
+|---|---|---|---|
+|1|开题 ppt 和翻译报告|[已完成](https://github.com/hy-huang20/rust-os-learning/tree/main/2026S/%E5%BC%80%E9%A2%98)||
+|2|[rCore-N 异步 timer 开发 debug](https://github.com/hy-huang20/rust-os-learning/issues/21)|[已完成](https://github.com/hy-huang20/rust-os-learning/commit/8d83395e34c757c0a92f24a1840c20e1449cb658)|之前存在理解误区，不应该将 trap_handler 实现为 async 的|
+
+### 下周
+
+||计划|备注|
+|---|---|---|
+|1|20260115 开题汇报||
+|2|验证 rCore-N 异步 timer 的正确性||
+
 ## 20250107
 
 ### 进度
@@ -14,8 +30,9 @@
 
 ||计划|备注|
 |---|---|---|
-|1|准备开题报告|<ul><li>网络所应该是在 20260115-20260116 开题</li><li>更新最新进度</li></ul>|
-|2|移除 rCore-N 中的 uart.rs 并引入林晨的 async-uart-driver 运行|复现|
+|1|准备开题报告|<ul><li>网络所应该是在 20260115-20260116 开题</li><li>更新**最新进度**与**后续规划**</li></ul>|
+|2|验证实现的异步 timer 的正确性|<ul><li>正确的实现应能够**堆栈复用**：查看栈指针是否变化？</li><li>直接 `println!` 调试不现实，因为时间片太短输出太快</li><li>**单步追踪**或者借助一些**别的输出方法**</li><li>**演示**实现的正确性</li></ul>|
+|3|移除 rCore-N 中的 uart.rs 并引入林晨的 async-uart-driver 运行|复现|
 
 ## 20251231
 
