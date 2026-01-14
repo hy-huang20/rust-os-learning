@@ -8,7 +8,7 @@
 
 ## 20260113
 
-[commit id: 8539c43](https://github.com/hy-huang20/rCore-N/commit/8539c43f29775a01c40d1c36fe1e66b5ebd00428)
+[commit id: 1f36d22](https://github.com/hy-huang20/rCore-N/commit/1f36d220e19a481e1b1e538caf2bbeb89724b4ec)
 
 之前的想法和实现错了。**不要将 os trap_handler 函数实现为 async 的。**
 
