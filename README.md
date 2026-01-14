@@ -9,7 +9,7 @@
 ||任务|状态|备注|
 |---|---|---|---|
 |1|开题 ppt 和翻译报告|[已完成](https://github.com/hy-huang20/rust-os-learning/tree/main/2026S/%E5%BC%80%E9%A2%98)||
-|2|[rCore-N 异步 timer 开发 debug](https://github.com/hy-huang20/rust-os-learning/issues/21)|[已完成](https://github.com/hy-huang20/rust-os-learning/commit/8d83395e34c757c0a92f24a1840c20e1449cb658)|之前存在理解误区，不应该将 trap_handler 实现为 async 的|
+|2|[rCore-N 异步 timer 开发 debug](https://github.com/hy-huang20/rust-os-learning/issues/21)|[已完成](https://github.com/hy-huang20/rust-os-learning/commit/49282a1038ecfa649ffd7de8cd3e81e238c6062a)|之前存在理解误区，不应该将 trap_handler 实现为 async 的|
 
 ### 下周
 
