@@ -2,6 +2,20 @@
 
 总体的计划安排 [实时更新中](#20250611)
 
+## 20250121
+
+### 进度
+
+||任务|状态|备注|
+|---|---|---|---|
+|1|[rCore-N 异步 timer 正确性验证](https://github.com/hy-huang20/rust-os-learning/issues/21)|[已完成](https://github.com/hy-huang20/rust-os-learning/commit/e3865f61c89419e788d3822e3daa0cf5897d81a4)|每次 poll 时查看 poll 函数的 sp 是否保持不变|
+
+### 下周
+
+||计划|备注|
+|---|---|---|
+|1|[移除 rCore-N 中的原串口逻辑并引入林晨的 async-uart-driver 运行](https://github.com/hy-huang20/rust-os-learning/issues/27)|复现 [注意](https://github.com/hy-huang20/rust-os-learning/commit/a9e4987717c1a28343d5a73e0c0af9ddb686f34d)|
+
 ## 20250114
 
 ### 进度
