@@ -8,7 +8,7 @@
 
 ||任务|状态|备注|
 |---|---|---|---|
-|1|[rCore-N 异步 timer 正确性验证](https://github.com/hy-huang20/rust-os-learning/issues/21)|[已完成](https://github.com/hy-huang20/rust-os-learning/commit/945b88b35418524643cc2f5835cc1462b6b8302d)|每次 poll 时查看 poll 函数的 sp 是否保持不变|
+|1|[rCore-N 异步 timer 正确性验证](https://github.com/hy-huang20/rust-os-learning/issues/21)|[已完成](https://github.com/hy-huang20/rust-os-learning/blob/main/%E8%BF%87%E7%A8%8B%E8%AE%B0%E5%BD%95/rCore-N/async-timer.md)|每次 poll 时查看 poll 函数的 sp 是否保持不变|
 
 ### 下周
 
