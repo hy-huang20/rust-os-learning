@@ -10,7 +10,7 @@ rust future 就是一个协程，future 中的属性相当于该协程的状态�
 
 >注：由于 rCore-N 不支持嵌套中断，于是 rCore-N 中 os`trap_handler` 使用的栈是被打断线程的**内核栈**
 
-![excalidraw 绘制](./img/poll-stack.png)
+![excalidraw 绘制](./img/poll-stack.svg)
 
 如上图所示，对于 `Executor::run_until_idle` 中每轮 while 循环执行的 `AsyncTimerFuture` 的 poll，**栈帧的 fp 都是不变的**。
 
