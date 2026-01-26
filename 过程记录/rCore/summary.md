@@ -2,7 +2,7 @@
 
 把 rCore 的一些重要性质总结在这里，作为复习。
 
-注：可能某些细节和 rCore-N 存在差别（如：留给 os 的栈空间 `boot_stack` 的大小, rCore-N 是 4096 * 16 * 4 字节，而 rCore 如下所述是 4096 * 16 字节）。以下内容如果没有提及具体章节，均以 rCore-2025S 的 ch8 分支为准。
+注：**某些设计和值和 rCore-N 存在差别**（如：留给 os 的栈空间 `boot_stack` 的大小, rCore-N 是 4096 * 16 * 4 字节，而 rCore 如下所述是 4096 * 16 字节）。以下内容如果没有提及具体章节，均以 rCore-2025S 的 ch8 分支为准。
 
 以下内容不会涉及到文件系统章节。
 
@@ -18,17 +18,13 @@ RustSBI 作为 bootloader 运行在 M 态。OS 为 S 态，用户为 U 态。
 
 OS 中的各个段之间如有必要会进行补齐以保证各段从 4K 倍地址开始。
 
-#### 用户虚拟地址空间布局
-
-![用户虚拟地址空间布局](./img/user-virtual-memory-space.svg)
-
 #### 内核虚拟地址空间布局
 
 ![内核虚拟地址空间布局](./img/kernel-virtual-memory-space.svg)
 
 `satp.MODE` 为 0 则所有访存为物理地址，为 8 则 `S/U` 态访存为虚拟地址需经 MMU 转换。MMU 将 39 位虚拟地址转换为 56 位物理地址。
 
-rCore 使用 SV39 多级页表机制。SV39 地址空间虽然位宽为 64 位，但只有低 2^39 (512 G) 个地址和高 2^39 个地址是有效的，因为 64 位地址的高 25 位必须与第 38 位保持一致。
+rCore 使用 SV39 多级页表机制。SV39 地址空间虽然位宽为 64 位，但因为 64 位地址的高 25 位必须与第 38 位（从第 0 位开始的）保持一致，所以只有低 2^38 (256 GiB) 个地址（第 38 位为 0）和高 2^38 个地址（第 38 位为 1）是有效的。
 
 rCore 的页大小 `PAGE_SIZE` 为 4 KiB。
 
@@ -36,13 +32,35 @@ rCore 的页大小 `PAGE_SIZE` 为 4 KiB。
 
 内核代码访存虽然也是虚拟地址，但是几乎全都是恒等映射，即**内核访存虚拟地址等于物理地址**，可以去看 `MemorySet::new_kernel` 的代码，包括了 `os/src/linker.ld` 中的全部段和 MMIO 外设，**只有 trampoline 页和线程内核栈两个例外**。这两个例外在内核虚拟内存空间位于**最顶部**，映射到物理空间中，虚拟地址 `TRAMPOLINE` 被映射到物理内存中位于 os 的 `.text` 段的 `strampoline`，而线程内核栈被映射到物理内存中 `FRAME_ALLOCATOR` 管理的区域。可以去看 ch4 的[指导书](https://learningos.cn/rCore-Tutorial-Guide-2025S/chapter4/5kernel-app-spaces.html#id5)。
 
+#### 用户虚拟地址空间布局
+
+![用户虚拟地址空间布局](./img/user-virtual-memory-space.svg)
+
+用户虚拟地址空间的 trampoline 页也会被映射到物理地址空间中 os 的 `.text` 段中的 trampoline 页。
+
+>#### 关于 trampoline 页
+>
+>简单来说，在 U 态/S 态之间切换的时候与**换页表**相关。
+>
+>trampoline 页中存放着 `os/src/trap.S` 中的 `__alltraps` 和 `__restore` 代码。
+>
+>`TrapContext` 顾名思义存放 Trap 上下文。`TrapContext::kernel_sp` 存放着当前线程内核栈的虚拟地址；而 `TrapContext::kernel_satp` 记录了内核根页表的 `PPN`, 由 U 态到 S 态后切换页表时会将这个值赋给 `satp` CSR, 在 `__alltraps` 中可以看到。
+>
+>`TrapContext` 页的映射是 `Framed` 的。
+>
+>用户虚拟地址空间的 `TrapContext` 页和 trampoline 页**绝对不能**被用户态代码访问。
+>
+>trampoline 页存在的意义是保证在换页表前后的 pc 在用户虚拟地址空间和在内核虚拟地址空间中均指向相同的物理页面。否则切换页表后地址空间变了但 pc 没变，CPU 试图执行下一条语句时就会马上出错。
+>
+>`TrapContext` 页存在的意义：如果将 Trap 上下文保存在线程内核栈中，那就会出现**悖论**：如果 `TrapContext` 放到内核栈中，那你访问内核栈就需要先知道 `kernel_sp`, 但你要先访问内核栈上的 `TrapContext` 才能知道 `kernel_sp`, 从而产生悖论。
+
 ### 1.2. 堆与栈
 
 #### OS 的堆与栈
 
 **os 的 `.bss.stack` 栈空间与堆空间都不是给用户程序用的，而是给 os 自己用的**。
 
-OS 的 `.bss.stack` 段被用作 OS 的栈空间，大小为 4096 * 16 字节即 64 KiB。这个 os 的 `.bss.stack` 栈是专门给 `rust_main` 和 idle 线程用的（待确认）。
+OS 的 `.bss.stack` 段被用作 OS 的栈空间，大小为 4096 * 16 字节即 64 KiB。这个 os 的 `.bss.stack` 栈是专门给 `rust_main` 和 idle 进程用的。
 
 关于 OS 的堆空间，可以参考 `os/src/mm/heap_allocator.rs` 中的 `HEAP_SPACE` 这个 `static` 全局数组。其被初始化为全 0, 因此会被放在 `heap_allocator.rs` 编译汇编后二进制文件中的 `.bss` 段。而链接器会根据 `os/src/linker.ld` 中的如下内容：
 
@@ -77,8 +95,7 @@ fn clear_bss() {
 
 `HEAP_SPACE` 的大小 `KERNEL_HEAP_SIZE` 为 `0x200_0000` 字节即 32 MiB。注意支持了**虚拟内存**后，用户程序不再需要硬编码到 `0x80400000`, 所以不用像 ch3 一样只为 os 堆预留 `0x20000` 字节即 128 KiB 的空间以防止 os 堆覆盖用户程序。
 
-由 `HEAP_ALLOCATOR` 管理 `HEAP_SPACE`。 
-在内核中写代码写了个 `Box::new()`，便会向 `HEAP_ALLOCATOR` 申请内核堆上的空间。
+由 `HEAP_ALLOCATOR` 管理 `HEAP_SPACE`。比如在内核中写代码写了个 `Box::new()`，便会向 `HEAP_ALLOCATOR` 申请内核堆上的空间。
 
 >##### 内核代码是如何向 `HEAP_ALLOCATOR` 申请内存的
 >
@@ -96,7 +113,7 @@ fn clear_bss() {
 
 #### 用户的堆与栈
 
-用户程序的栈空间是 os 在加载用户程序时为用户程序分配的（来自 `FRAME_ALLOCATOR`）；而用户程序申请释放用户堆空间的话，可以去看用户程序库中 `user/src/lib.rs` 的代码，里面实现了一套和上述 OS `HEAP_ALLOCATOR` 完全一致的代码逻辑：
+用户程序的栈空间是 os 在加载用户程序时为用户程序分配的（来自 `FRAME_ALLOCATOR`，可以去看 `TaskUserRes::alloc_user_res()` 的代码）；而用户程序申请释放用户堆空间的话，可以去看用户程序库中 `user/src/lib.rs` 的代码，里面实现了一套和上述 OS `HEAP_ALLOCATOR` 完全一致的代码逻辑：
 
 ```rust
 const USER_HEAP_SIZE: usize = 16384;
@@ -118,7 +135,7 @@ pub extern "C" fn _start(argc: usize, argv: usize) -> ! {
 }
 ```
 
-和 os 中的逻辑一样地，这里的 `HEAP_SPACE` 也会放到用户程序编译汇编后二进制文件的中的 `.bss` 段。但是查看 os 中 `MemorySet::from_elf` 和 `MemorySet::from_existed_user` 的逻辑可以发现，除了 trampoline 的映射外（既不是 `Framed` 的又不是 `Identical` 的。看代码可以发现 trampoline 不受或者说绕过了 `MapArea` 的管理，所以无所谓 `Framed` 或者 `Identical`，它的映射直接手动调用了 `PageTable` 的 `map`），用户程序的其余所有部分都是 `Framed` 映射，因此在用户程序眼中的 `HEAP_SPACE` 会被映射到物理地址空间中 `FRAME_ALLOCATOR` 管理的区域。所以用户堆空间在物理地址空间中是放在 `FRAME_ALLOCATOR` 管理的区域中。
+和 os 中的逻辑一样地，这里的 `HEAP_SPACE` 也会放到用户程序编译汇编后二进制文件的中的 `.bss` 段。但是查看 os 中 `MemorySet::from_elf` 和 `MemorySet::from_existed_user` 的逻辑可以发现，除了 trampoline 的映射外（既不是 `Framed` 的又不是 `Identical` 的。看代码可以发现 trampoline 不受或者说**绕过**了 `MapArea` 的管理，所以无所谓 `Framed` 或者 `Identical`，它的映射直接手动调用了 `PageTable` 的 `map`），用户程序的其余所有部分都是 `Framed` 映射，因此在用户程序眼中的 `HEAP_SPACE` 会被映射到物理地址空间中 `FRAME_ALLOCATOR` 管理的区域。所以用户堆空间在物理地址空间中是放在 `FRAME_ALLOCATOR` 管理的区域中。
 
 用户申请用户堆空间内存的方式应**区分于**通过 `sys_map` 和 `sys_unmap` 系统调用（见 ch4 练习）向 `FRAME_ALLOCATOR` 申请内存的方式。
 
@@ -136,7 +153,7 @@ _start:
 
 - `clear_bss()`: 清零 `.bss` 段中从 `sbss` 到 `ebss` 的部分
 - `mm::init()`: 初始化 `FRAME_ALLOCATOR` 和 `HEAP_ALLOCATOR`
-- `trap::init()`: 调用 `set_kernel_trap_entry()` 设置 `stvec` CSR 规定当**内核代码出问题时**应该跳到哪里。顺便提一下，进入 S 态 `trap_handler` 首先就会调用 `set_kernel_trap_entry()`，将从 S 态 `trap_handler` 返回 U 态时在 `trap_return` 中首先就会调用 `set_user_trap_entry()`
+- `trap::init()`: 调用 `set_kernel_trap_entry()` 设置 `stvec` CSR 规定当**内核代码出问题时**应该跳到哪里。顺便提一下，进入 S 态 `trap_handler` 首先就会调用 `set_kernel_trap_entry()` 设置 `stvec`，将从 S 态 `trap_handler` 返回 U 态时在 `trap_return` 中首先就会调用 `set_user_trap_entry()` 设置 `stvec`
 - `trap::enable_timer_interrupt()`: 使能 S 态时钟中断
 - `timer::set_next_trigger()`: os 时间片相关，设置下一次硬件时钟中断的到来
 - `task::add_initproc()`: `INITPROC.clone()` 触发 `INITPROC` 的 `lazy_static`，在 pcb `new` 中将 initproc 加到 `TASK_MANAGER` 中去
@@ -179,6 +196,6 @@ pid 为 1, `initproc`，对应的程序名为 `ch8b_initproc`，由 0 号进程�
 
 注意 `ch8b_initproc` **不是**你看到的 shell 程序，可以去看 `user/src/bin/ch8b_initproc.rs` 的源码。可以发现 `initproc` 和 user shell 是父子关系。shell 程序是 PID 2，对应的源文件为 `ch7b_user_shell`。
 
-从 1 号进程开始的所有进程，使用的均是**用户栈**和**内核栈**两套栈。用户栈内核栈在物理地址空间上均位于 `FRAME_ALLOCATOR` 管理的区域。
+从 1 号进程开始的所有进程，使用的均是**用户栈**和**内核栈**两套栈。用户栈和内核栈在物理地址空间上均位于 `FRAME_ALLOCATOR` 管理的区域。
 
 线程的用户栈和内核栈大小都是 8 KiB（自 ch4 开始）。
