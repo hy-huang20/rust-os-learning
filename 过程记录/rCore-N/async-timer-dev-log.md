@@ -6,6 +6,10 @@
 
 记录追踪开发过程中的想法和实现过程，可能会频繁修改，且**不能**保证所有历史内容的正确性。更新中...
 
+## 20260127
+
+设想：之前的设计在 os 的 `trap_handler` 中进行 wake 和 poll 两个操作（即 `waker.wake()` 和 `executor.run_until_idle()` 调用，在 `AsyncTimer` 的 `interrupt_handler` 中）。现在的设想是在 `trap_handler` 中仅进行 wake 而**将 poll 操作移动到 idle 进程中**。这样，poll 使用的栈就由被中断打断的某个随机线程的内核栈变成**固定**的 os 的 `.bss.stack` 栈。这样的好处是可以减轻线程内核栈的内存压力，因为传统 timer **不得不**在一个线程内核栈上运行 `set_next_trigger()` 和 `suspend_current_and_run_next()` 两个函数调用，之前的异步 timer 实现也没有避免使用线程内核栈空间的情况。如果能省去这部分在之前看来是**必需**的线程内核栈内存使用，则后续设计线程内核栈的固定大小时便可相应缩减以节省内存使用。而且无论是几千还是几万个 future，对于 `.bss.stack` 栈来说都仅仅只会多一个 future.poll 空间的使用。
+
 ## 20260113
 
 [commit id: 1f36d22](https://github.com/hy-huang20/rCore-N/commit/1f36d220e19a481e1b1e538caf2bbeb89724b4ec)
