@@ -20,6 +20,8 @@
 
 因为之前的想法存在问题，所以可以几乎无视 [20260107](#20260107) 的记录。
 
+对应的总结记录[参考](https://github.com/hy-huang20/rust-os-learning/blob/800cb07326f4c1c82af5bf2cff41743872305dfa/%E8%BF%87%E7%A8%8B%E8%AE%B0%E5%BD%95/rCore-N/async-timer.md)。
+
 ## 20260107
 
 [commit id: 8663da0](https://github.com/hy-huang20/rCore-N/commit/8663da00f4ef4c1679071646cabbc7819964c335)
