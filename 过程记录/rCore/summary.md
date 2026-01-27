@@ -199,3 +199,78 @@ pid 为 1, `initproc`，对应的程序名为 `ch8b_initproc`，由 0 号进程�
 从 1 号进程开始的所有进程，使用的均是**用户栈**和**内核栈**两套栈。用户栈和内核栈在物理地址空间上均位于 `FRAME_ALLOCATOR` 管理的区域。
 
 线程的用户栈和内核栈大小都是 8 KiB（自 ch4 开始）。
+
+## 4. 案例分析
+
+以下是我当时写 rCore-2025S ch 4 实验时按指导书要求改写的 `sys_get_time` 并且成功通过了测例。
+
+```rust
+// os/src/syscall/process.rs
+
+/// YOUR JOB: get time with second and microsecond
+/// HINT: You might reimplement it with virtual memory management.
+/// HINT: What if [`TimeVal`] is splitted by two pages ?
+pub fn sys_get_time(_ts: *mut TimeVal, _tz: usize) -> isize {
+    trace!("kernel: sys_get_time");
+    let us = get_time_us();
+    let ts = TimeVal {
+        sec: us / 1_000_000,
+        usec: us % 1_000_000,
+    };
+    let size_of_timeval = core::mem::size_of::<TimeVal>();
+    let buffers = translated_byte_buffer(current_user_token(), _ts as *const u8, size_of_timeval);
+    let ts_byte_arr: &[u8] = unsafe {
+        core::slice::from_raw_parts(
+            &ts as *const TimeVal as *const u8,
+            size_of_timeval
+        )
+    };
+    let mut ts_idx: usize = 0;
+    for buffer in buffers {
+        buffer.copy_from_slice(&ts_byte_arr[ts_idx..ts_idx+buffer.len()]);
+        ts_idx += buffer.len();
+    }
+    0
+}
+```
+
+函数参数中的 `_ts: *mut TimeVal` 无疑是用户虚拟地址，不能直接访问。现在看来我当时有些地方没有想明白，有些想法是错误的，虽然没有影响测例通过。我当时认为：`&ts` 是物理地址，对 buffers 的访存也是物理地址。这是错误的。
+
+首先 `&ts` 是虚拟地址，是**内核的虚拟地址**。而且 `&ts` 对应的物理地址**并不等于**这个虚拟地址。因为 `sys_get_time()` 使用的是用户 task 的内核栈，而该栈从 os 虚拟地址空间到物理地址空间的映射是 `Framed` 的，并非恒等。
+
+其次，对 buffers 的访存也是基于 os 的虚拟地址。可以查看 `translated_byte_buffer` 的实现：
+
+```rust
+/// Translate&Copy a ptr[u8] array with LENGTH len to a mutable u8 Vec through page table
+pub fn translated_byte_buffer(token: usize, ptr: *const u8, len: usize) -> Vec<&'static mut [u8]> {
+    let page_table = PageTable::from_token(token);
+    let mut start = ptr as usize;
+    let end = start + len;
+    let mut v = Vec::new();
+    while start < end {
+        let start_va = VirtAddr::from(start);
+        let mut vpn = start_va.floor();
+        let ppn = page_table.translate(vpn).unwrap().ppn();
+        vpn.step();
+        let mut end_va: VirtAddr = vpn.into();
+        end_va = end_va.min(VirtAddr::from(end));
+        if end_va.page_offset() == 0 {
+            v.push(&mut ppn.get_bytes_array()[start_va.page_offset()..]);
+        } else {
+            v.push(&mut ppn.get_bytes_array()[start_va.page_offset()..end_va.page_offset()]);
+        }
+        start = end_va.into();
+    }
+    v
+}
+```
+
+虽然 `buffers` 作为 `Vec` 其中的每个元素确实是来自于用户虚拟地址对应的物理地址：`&mut ppn.get_bytes_array()[start_va.page_offset()..end_va.page_offset()]`，但由于用户传过来的变量在物理内存上是位于 `ekernel` 到 `MEMORY_END` 段也即 `FRAME_ALLOCATOR` 管理的区域，而对于 os 来说，从 os 虚拟地址空间到物理地址空间的映射中这段区域是 `Identical` 恒等映射，所以我之前基于“对 buffers 的访存视为访问物理地址”的想法编写的代码才侥幸正确，因为无论将对 buffers 的访存视为访问物理地址还是访问 os 虚拟地址，地址都是一样的。但实际上正确的认知是将对 buffers 的访存视为访问 os 的虚拟地址。
+
+>节选自 [ch4 实验指导书](https://learningos.cn/rCore-Tutorial-Guide-2025S/chapter4/6multitasking-based-on-as.html#sys-write)
+>
+>`translated_byte_buffer` 会以向量的形式返回一组可以在内核空间中直接访问的字节数组切片，具体实现在这里不再赘述。
+
+如上所述，指导书中说 buffers 可以在内核空间直接访问。在内核眼中，自己能直接访存的空间就是自己的虚拟地址空间。
+
+因为本质上来说，**对于使能了 MMU 的 SV39 来说，CPU 只认虚拟地址**。
