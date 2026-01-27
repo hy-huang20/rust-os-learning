@@ -8,7 +8,11 @@
 
 ## 20260127
 
-设想：之前的设计在 os 的 `trap_handler` 中进行 wake 和 poll 两个操作（即 `waker.wake()` 和 `executor.run_until_idle()` 调用，在 `AsyncTimer` 的 `interrupt_handler` 中）。现在的设想是在 `trap_handler` 中仅进行 wake 而**将 poll 操作移动到 idle 进程中**。这样，poll 使用的栈就由被中断打断的某个随机线程的内核栈变成**固定**的 os 的 `.bss.stack` 栈。这样的好处是可以减轻线程内核栈的内存压力，因为传统 timer **不得不**在一个线程内核栈上运行 `set_next_trigger()` 和 `suspend_current_and_run_next()` 两个函数调用，之前的异步 timer 实现也没有避免使用线程内核栈空间的情况。如果能省去这部分在之前看来是**必需**的线程内核栈内存使用，则后续设计线程内核栈的固定大小时便可相应缩减以节省内存使用。而且无论是几千还是几万个 future，对于 `.bss.stack` 栈来说都仅仅只会多一个 future.poll 空间的使用。
+rCore-N 线程内核栈大小 `KERNEL_STACK_SIZE` 为 16 KiB，而 os 的 boot stack 的 大小 `.bss.stack` 的大小为 256 KiB。 
+
+设想：之前的设计在 os 的 `trap_handler` 中进行 wake 和 poll 两个操作（即 `waker.wake()` 和 `executor.run_until_idle()`，在 `AsyncTimer` 的 `interrupt_handler` 中）。现在的设想是在 `trap_handler` 中仅进行 wake 而**将 poll 操作移动到 idle 进程中**。这样，poll 使用的栈就由被中断打断的某个随机线程的内核栈变成**固定**的 os 的 `.bss.stack` 栈。这样的好处是可以减轻线程内核栈的内存压力，因为传统 timer **不得不**在某个随机线程内核栈上运行 `set_next_trigger()` 函数调用，之前的异步 timer 实现也没有避免使用线程内核栈空间的情况。现在准备将 `set_next_trigger()` 移动到 poll 函数内部（否则在之前的实现中异步改写显得多余），将 poll 的调用移动到 idle 进程中。如果能省去这部分在之前看来是**必需**的线程内核栈内存使用，则后续设计线程内核栈的固定大小时便可相应缩减以节省内存使用。而且无论是几千还是几万个 future，对于 `.bss.stack` 栈来说都仅仅只会多一个 future.poll 空间的使用。
+
+但是这样的设计似乎不利于将异步逻辑封装为 crate。因为如果封装成不依赖于 os 的 crate 的话意味着需要暴露 crate 内的 Executor 提供给 os，同时还要修改 os 的 idle 进程的实现。林晨的 async-uart-driver crate 就是在异步串口驱动 `AsyncSerial` 的 `interrupt_handler()`（中断时调用）中同时进行 wake 和 poll 操作。
 
 ## 20260113
 
