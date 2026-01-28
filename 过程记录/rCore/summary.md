@@ -159,7 +159,7 @@ _start:
 
 - `clear_bss()`: 清零 `.bss` 段中从 `sbss` 到 `ebss` 的部分
 - `mm::init()`: 初始化 `FRAME_ALLOCATOR` 和 `HEAP_ALLOCATOR`
-- `trap::init()`: 调用 `set_kernel_trap_entry()` 设置 `stvec` CSR 规定当**内核代码出问题时**应该跳到哪里。顺便提一下，进入 S 态 `trap_handler` 首先就会调用 `set_kernel_trap_entry()` 设置 `stvec`，将从 S 态 `trap_handler` 返回 U 态时在 `trap_return` 中首先就会调用 `set_user_trap_entry()` 设置 `stvec`
+- `trap::init()`: 调用 `set_kernel_trap_entry()` 设置 `stvec` CSR 规定当**内核代码出问题时**应该跳到哪里。顺便提一下，进入 S 态 `trap_handler` 首先就会调用 `set_kernel_trap_entry()` 设置 `stvec`，将从 S 态 `trap_handler` 返回 U 态时在 `trap_return` 中首先就会调用 `set_user_trap_entry()` 设置 `stvec`。两个都是将 `stvec` 设置为 `TrapMode::Direct` 模式，其中内核出问题会跳 `kernelvec` 跳 `trap_from_kernel`（都在汇编里面），用户出问题会跳 `TRAMPOLINE`
 - `trap::enable_timer_interrupt()`: 使能 S 态时钟中断
 - `timer::set_next_trigger()`: os 时间片相关，设置下一次硬件时钟中断的到来
 - `task::add_initproc()`: `INITPROC.clone()` 触发 `INITPROC` 的 `lazy_static`，在 pcb `new` 中将 initproc 加到 `TASK_MANAGER` 中去
