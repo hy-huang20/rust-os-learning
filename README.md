@@ -2,19 +2,40 @@
 
 总体的计划安排 [实时更新中](#20250611)
 
+## 20250128
+
+### 进度
+
+||任务|状态|备注|
+|---|---|---|---|
+|1|[复习 rCore](https://github.com/hy-huang20/rust-os-learning/issues/11)|[已完成](https://github.com/hy-huang20/rust-os-learning/blob/main/%E8%BF%87%E7%A8%8B%E8%AE%B0%E5%BD%95/rCore/summary.md)|画图加深理解；修正一些之前错误的理解|
+|2|以校历第X周格式形成毕设计划|[已完成](https://github.com/hy-huang20/rust-os-learning/blob/main/2026S/2026S%E8%AE%A1%E5%88%92%E5%AE%89%E6%8E%92.md)|初步安排|
+|3|[rCore-N 异步 timer 正确性验证](https://github.com/hy-huang20/rust-os-learning/issues/21)|[进行中](https://github.com/hy-huang20/rust-os-learning/blob/main/%E8%BF%87%E7%A8%8B%E8%AE%B0%E5%BD%95/rCore-N/async-timer-dev-log.md#20260127)|对目前 rCore-N 异步 timer 实现的内存分析|
+
+### 下周
+
+假期安排
+
+||计划|备注|
+|---|---|---|
+|1|假期学习星光二开发板的使用|20260130 回家前领开发板|
+|2|[rCore-N 串口逻辑学习](https://github.com/hy-huang20/rust-os-learning/issues/28)|<ul><li>分析用户程序 `uart_benchmark.rs` 的功能</li><li>学习并比较 `BufferedSerial`, `PollingSerial`, `AsyncSerial` 的逻辑</li></ul>|
+|3|[移除 rCore-N 中的原串口逻辑并引入林晨的 async-uart-driver 运行](https://github.com/hy-huang20/rust-os-learning/issues/27)|复现|
+
 ## 20250121
 
 ### 进度
 
 ||任务|状态|备注|
 |---|---|---|---|
-|1|[rCore-N 异步 timer 正确性验证](https://github.com/hy-huang20/rust-os-learning/issues/21)|[已完成](https://github.com/hy-huang20/rust-os-learning/blob/main/%E8%BF%87%E7%A8%8B%E8%AE%B0%E5%BD%95/rCore-N/async-timer.md)|每次 poll 时查看 poll 函数的 sp 是否保持不变|
+|1|[rCore-N 异步 timer 正确性验证](https://github.com/hy-huang20/rust-os-learning/issues/21)|[进行中](https://github.com/hy-huang20/rust-os-learning/blob/800cb07326f4c1c82af5bf2cff41743872305dfa/%E8%BF%87%E7%A8%8B%E8%AE%B0%E5%BD%95/rCore-N/async-timer.md)|每次 poll 时查看 poll 函数的 sp 是否保持不变|
 
 ### 下周
 
 ||计划|备注|
 |---|---|---|
-|1|[移除 rCore-N 中的原串口逻辑并引入林晨的 async-uart-driver 运行](https://github.com/hy-huang20/rust-os-learning/issues/27)|复现 [注意](https://github.com/hy-huang20/rust-os-learning/commit/a9e4987717c1a28343d5a73e0c0af9ddb686f34d)|
+|1|[rCore-N 异步 timer 正确性验证](https://github.com/hy-huang20/rust-os-learning/issues/21)|根据向老师的建议进行改进：开多个线程的情况；验证节省内存|
+|2|[移除 rCore-N 中的原串口逻辑并引入林晨的 async-uart-driver 运行](https://github.com/hy-huang20/rust-os-learning/issues/27)|复现 [注意](https://github.com/hy-huang20/rust-os-learning/commit/a9e4987717c1a28343d5a73e0c0af9ddb686f34d)|
 
 ## 20250114
 
