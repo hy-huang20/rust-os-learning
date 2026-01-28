@@ -32,11 +32,17 @@ rCore 的页大小 `PAGE_SIZE` 为 4 KiB。
 
 内核代码访存虽然也是虚拟地址，但是几乎全都是恒等映射，即**内核访存虚拟地址等于物理地址**，可以去看 `MemorySet::new_kernel` 的代码，包括了 `os/src/linker.ld` 中的全部段和 MMIO 外设，**只有 trampoline 页和线程内核栈两个例外**。这两个例外在内核虚拟内存空间位于**最顶部**，映射到物理空间中，虚拟地址 `TRAMPOLINE` 被映射到物理内存中位于 os 的 `.text` 段的 `strampoline`，而线程内核栈被映射到物理内存中 `FRAME_ALLOCATOR` 管理的区域。可以去看 ch4 的[指导书](https://learningos.cn/rCore-Tutorial-Guide-2025S/chapter4/5kernel-app-spaces.html#id5)。
 
-#### 用户虚拟地址空间布局
+#### 用户虚拟地址空间布局：ch8 之前
 
-![用户虚拟地址空间布局](./img/user-virtual-memory-space.svg)
+![用户虚拟地址空间布局-无线程](./img/user-virtual-memory-space.svg)
 
 用户虚拟地址空间的 trampoline 页也会被映射到物理地址空间中 os 的 `.text` 段中的 trampoline 页。
+
+#### 用户虚拟地址空间布局：ch8
+
+![用户虚拟地址空间布局-支持线程](./img/user-virtual-memory-space-ch8.svg)
+
+在支持线程的 ch8 之前，user stack 在 `MemorySet::from_elf` 的时候就会被映射，因为没有线程，对于一个进程来说只需要一个栈，所以也只需要这一次映射即可。而在实现了线程的 ch8 中，一个进程可能有多个线程，每个线程都需要一个用户栈，所以并不是在 `MemorySet::from_elf` 中只统一映射一次用户栈就能完成的，而是在每次有新线程产生时就需要在 `TaskUserRes::alloc_user_res()` 中为新线程映射它的用户栈空间。同时线程用户栈与线程用户栈之间会有一个 guard page 防止越界访问。这个 guard page 不会被映射，所以一旦被访问到就会触发 page fault。
 
 >#### 关于 trampoline 页
 >
