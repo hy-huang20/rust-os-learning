@@ -2,7 +2,7 @@
 
 总体的计划安排 [实时更新中](#20250611)
 
-## 20250128
+## 20260128
 
 ### 进度
 
@@ -14,15 +14,16 @@
 
 ### 下周
 
-假期安排
+后续安排
 
 ||计划|备注|
 |---|---|---|
-|1|假期学习星光二开发板的使用|20260130 回家前领开发板|
-|2|[rCore-N 串口逻辑学习](https://github.com/hy-huang20/rust-os-learning/issues/28)|<ul><li>分析用户程序 `uart_benchmark.rs` 的功能</li><li>学习并比较 `BufferedSerial`, `PollingSerial`, `AsyncSerial` 的逻辑</li></ul>|
-|3|[移除 rCore-N 中的原串口逻辑并引入林晨的 async-uart-driver 运行](https://github.com/hy-huang20/rust-os-learning/issues/27)|复现|
+|1|阅读向老师提供的[参考1](https://web.archive.org/web/20230203001355/https://cfsamson.github.io/books-futures-explained/introduction.html)和[参考2](https://blog.aloni.org/posts/a-stack-less-rust-coroutine-100-loc/)复习 rust future|[参考3](https://www.yuque.com/xyong-9fuoz/hg8kgr/orddgx677bplf6pl)`异步网卡驱动开发`作为一个已成熟项目可酌情参考|
+|2|[rCore-N 异步 timer 正确性验证](https://github.com/hy-huang20/rust-os-learning/issues/21)|继续完成。向老师提供的指正：**trap_handler 应是 async 的**|
+|3|[rCore-N 串口逻辑学习](https://github.com/hy-huang20/rust-os-learning/issues/28)|<ul><li>分析用户程序 `uart_benchmark.rs` 的功能</li><li>学习并比较 `BufferedSerial`, `PollingSerial`, `AsyncSerial` 的逻辑</li></ul>|
+|4|[移除 rCore-N 中的原串口逻辑并引入林晨的 async-uart-driver 运行](https://github.com/hy-huang20/rust-os-learning/issues/27)|复现|
 
-## 20250121
+## 20260121
 
 ### 进度
 
@@ -37,7 +38,7 @@
 |1|[rCore-N 异步 timer 正确性验证](https://github.com/hy-huang20/rust-os-learning/issues/21)|根据向老师的建议进行改进：开多个线程的情况；验证节省内存|
 |2|[移除 rCore-N 中的原串口逻辑并引入林晨的 async-uart-driver 运行](https://github.com/hy-huang20/rust-os-learning/issues/27)|复现 [注意](https://github.com/hy-huang20/rust-os-learning/commit/a9e4987717c1a28343d5a73e0c0af9ddb686f34d)|
 
-## 20250114
+## 20260114
 
 ### 进度
 
@@ -53,7 +54,7 @@
 |1|20260115 开题汇报||
 |2|验证 rCore-N 异步 timer 的正确性||
 
-## 20250107
+## 20260107
 
 ### 进度
 
