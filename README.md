@@ -2,6 +2,26 @@
 
 总体的计划安排 [实时更新中](#20250611)
 
+## 20260309
+
+### 进度
+
+||任务|状态|备注|
+|---|---|---|---|
+|1|阅读向老师提供的 [futures-explained-in-200-lines-of-rust](https://web.archive.org/web/20230203001355/https://cfsamson.github.io/books-futures-explained/introduction.html) 和 [stack-less-coroutine](https://blog.aloni.org/posts/a-stack-less-rust-coroutine-100-loc/) 复习 rust future|[issue1](https://github.com/hy-huang20/rust-learning/issues/7) [issue2](https://github.com/hy-huang20/rust-learning/issues/4)||
+
+### 下周
+
+||计划|备注|
+|---|---|---|
+|1|[rCore-N 异步 timer 正确性验证](https://github.com/hy-huang20/rust-os-learning/issues/21)|继续完成。向老师提供的指正：**trap_handler 应是 async 的**|
+|2|[rCore-N 串口逻辑学习](https://github.com/hy-huang20/rust-os-learning/issues/28)|<ul><li>分析用户程序 `uart_benchmark.rs` 的功能</li><li>学习并比较 `BufferedSerial`, `PollingSerial`, `AsyncSerial` 的逻辑</li></ul>|
+|3|[移除 rCore-N 中的原串口逻辑并引入林晨的 async-uart-driver 运行](https://github.com/hy-huang20/rust-os-learning/issues/27)|复现|
+
+## 20260302
+
+做完毕设主体工作后再考虑别的事情
+
 ## 20260128
 
 ### 进度
