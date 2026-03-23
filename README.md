@@ -2,6 +2,14 @@
 
 总体的计划安排 [实时更新中](#20250611)
 
+## 20260323
+
+### 进度
+
+||任务|状态|备注|
+|---|---|---|---|
+|1|复习 embassy|[进行中](https://github.com/hy-huang20/rust-learning/blob/embassy-learning/dev-log/state.md)||
+
 ## 20260316
 
 ### 进度
