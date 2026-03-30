@@ -2,6 +2,20 @@
 
 总体的计划安排 [实时更新中](#20250611)
 
+## 20260330
+
+### 进度
+
+||任务|状态|备注|
+|---|---|---|---|
+|1|[复习 embassy](https://github.com/hy-huang20/rust-learning/issues/9)|已完成|<ul><li>embassy-executor 中的[状态变化](https://github.com/hy-huang20/rust-learning/commit/af59928c6152ca12acc839127582c624bd01fa76)</li><li>embassy-rp 的 [timer 分析](https://github.com/hy-huang20/rust-learning/commit/c2cde7832cb07dcec3217b02757e105cb988f575)</li></ul>|
+
+### 下周
+
+||计划|备注|
+|---|---|---|
+|1|准备中期报告|20260403 下午|
+
 ## 20260323
 
 ### 进度
