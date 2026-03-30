@@ -142,6 +142,8 @@ fn __pender(context: *mut ()) {
 
 中断模式下的 `__pender` 提供了在不同 arm cortex_m 处理器架构下触发中断的方法。无论是 cortex_m v6m 还是 cortex_m v7 及以上，这段代码的作用都是**触发中断**，从而运行 `InterruptExecutor::on_interrupt()`。
 
+`on_interrupt()` 并不会在中断到来时自动被调用，关于用法以及如何设置中断模式 Executor 的优先级可以参考 [multiprio.rs](https://github.com/hy-huang20/embassy/blob/main/examples/rp/src/bin/multiprio.rs)。
+
 ## 3. 参考
 
 - [赵方亮的 embassy 学习记录](https://github.com/zflcs/learning/blob/main/notes/embassy%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0.md)
