@@ -223,7 +223,18 @@ extern "C" fn fast_handler(
 }
 ```
 
-目前的情况对应 `Ok(supervisor)` 逻辑，调用 `boot()`，之前提到的 `a0` 设置为 `hart_id` 就是在这里完成的！然后 `boot()` 中设置 `pc` 为 `supervisor.start_addr`，这个地址值就是 `0x8020_0000`！`supervisor.start_addr` 的值是在同文件下的 `rust_main` 中被设置的，里面有这么一段代码：
+目前的情况对应 `Ok(supervisor)` 逻辑，调用 `boot()`，之前提到的 `a0` 设置为 `hart_id` 就是在这里完成的！关于调用的 `hart_id()` 函数：
+
+```rust
+#[inline(always)]
+fn hart_id() -> usize {
+    riscv::register::mhartid::read()
+}
+```
+
+其实在执行 RustSBI 的第一行代码前，当前 hart 的 `hart_id` 就已经在 `mhartid` CSR 中了。`mhartid` 对于软件来说是**只读**的 CSR。**每个 hart 都有自己的一套独立的寄存器状态，包括 CSR**。QEMU 在实例化这台 virt 机器里的每个 hart 时，就把每个 hart 对应的 `mhartid` CSR 值设置好了。
+
+然后 `boot()` 中设置 `pc` 为 `supervisor.start_addr`，这个地址值就是 `0x8020_0000`！`supervisor.start_addr` 的值是在同文件下的 `rust_main` 中被设置的，里面有这么一段代码：
 
 ```rust
 mod constants {
