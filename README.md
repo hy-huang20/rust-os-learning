@@ -15,7 +15,8 @@
 
 ||计划|备注|
 |---|---|---|
-|1|[rCore-N 异步 timer 开发](https://github.com/hy-huang20/rust-os-learning/issues/21)|暂定引入 embassy 的 timer queue 链表|
+|1|rCore-N 原来的 timer 分析|比较和 embassy 的区别|
+|2|[rCore-N 异步 timer 开发](https://github.com/hy-huang20/rust-os-learning/issues/21)|暂定引入 embassy 的 timer queue 链表|
 
 ## 20260403 
 
