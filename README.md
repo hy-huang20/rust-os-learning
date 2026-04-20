@@ -14,7 +14,7 @@
 
 ||计划|备注|
 |---|---|---|
-|1|[rCore-N 异步 timer 开发](https://github.com/hy-huang20/rust-os-learning/issues/21)||
+|1|[rCore-N 异步 timer 开发](https://github.com/hy-huang20/rust-os-learning/issues/21)|确定了改 sleep|
 
 ## 20260413
 
