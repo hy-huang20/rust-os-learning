@@ -2,6 +2,20 @@
 
 总体的计划安排 [实时更新中](#20250611)
 
+## 20260420
+
+### 进度
+
+||任务|状态|备注|
+|---|---|---|---|
+|1|[rCore-N 异步 timer 开发](https://github.com/hy-huang20/rust-os-learning/issues/21)|[进行中](https://github.com/hy-huang20/rust-os-learning/commit/00a97afd39198281ef0d26aca0690c59b39b99f5)|<ul><li>task_from_waker() 编译错误</li><li>Timer().await 应该写在哪里</li></ul>|
+
+### 下周
+
+||计划|备注|
+|---|---|---|
+|1|[rCore-N 异步 timer 开发](https://github.com/hy-huang20/rust-os-learning/issues/21)||
+
 ## 20260413
 
 ### 进度
