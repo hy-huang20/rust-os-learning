@@ -148,4 +148,10 @@ TODO: 之前在照搬林晨 async-uart-driver 的过程中没有遇到 Waker 编
 
 ## 6. Timer().await
 
-最核心的问题，Timer().after(...).await() 写在哪里
+### 问题描述
+
+最核心的问题，Timer().after(...).await 写在哪里
+
+### 解决方法
+
+20260420 会后确定，Timer().await 应该用于修改 rCore-N 向 U 态程序提供的 sleep 实现
