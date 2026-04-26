@@ -146,6 +146,10 @@ pub fn task_from_waker(waker: &Waker) -> TaskRef {
 
 TODO: 之前在照搬林晨 async-uart-driver 的过程中没有遇到 Waker 编译错误，因为其没有使用到 task_from_waker() 这个方法，也许可以看看林晨是怎么做的
 
+### 更新
+
+embassy 中需要使用 task_from_waker() 即从 Waker 获取 TaskRef 的原因是其 timer queue 即 Queue::schedule_wake(at, waker) 中需要 TaskRef 访问 TaskHeader 中的 TimerQueueItem，因为 embassy 使用一个 TaskRef 链表，而这些链表的结点都放在 TaskHeader 中；而我这里的实现是使用了额外的 Vec 空间存储 Waker 和对应的时间戳 at，可以直接和 Queue::schedule_wake(at, waker) 传进来的 waker 对比，使用 Waker::will_wake() 对比，无需涉及到 TaskRef，所以这里不需要 TaskRef，也就不需要从 Waker 拿 TaskRef，也就不需要 task_from_waker() 这个函数。
+
 ## 6. Timer().await
 
 ### 问题描述
