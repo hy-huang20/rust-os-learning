@@ -1,5 +1,46 @@
 # 跑 rCore-N
 
+## 更新-20260429
+
+这次是在 virtualbox 上从零开始配置的。我把之前成功构建 rcoren 的 Cargo.lock 也上传到 github 仓库了。这次的 [commit](https://github.com/hy-huang20/rCore-N/commit/bb36643a8c483b359d487b4c5b593401a9abb0ef)。
+
+```
+# 下载 Rust
+# 不要通过 apt, snap 非官方路径安装 cargo, rustup！
+curl https://sh.rustup.rs -sSf | sh
+source $HOME/.cargo/env
+
+git clone https://github.com/hy-huang20/rCore-N.git
+git clone https://github.com/hy-huang20/qemu.git
+mkdir qemu-build
+cd qemu-build
+../qemu/configure --target-list="riscv64-softmmu" --extra-cflags=-Wno-error
+make -j
+
+cd ..
+cd rCore-N/
+# --locked 表示强制按照 just 1.14.0 发布时 just crate 自带的 Cargo.lock
+# 保证构建环境可以复现
+cargo install just --version 1.14.0 --locked
+cd os
+rustup target add riscv64imac-unknown-none-elf
+# 如果 LOG=DEBUG just run 提示找不到 rust-objcopy 则需要安装下面的工具
+cargo install cargo-binutils --version 0.3.6 --locked
+rustup component add llvm-tools-preview
+
+# 运行之前开三个窗口
+# 输入 tty 验证分别为 /dev/pts/0, /dev/pts/1, /dev/pts/2
+# 在 /dev/pts/0 窗口下输入如下指令启动内核
+LOG=DEBUG just run
+# 在 /dev/pts/1 窗口中与内核交互
+# >> Rust user shell
+# >>
+# 当然上述的 0, 1, 2 不是固定的
+# 可以看自己开的三个窗口的 tty
+# 然后去 qemu 配置中改对应的三处 -serial
+# 具体修改 justfile 的 SERIAL_FLAGS 的前三项
+```
+
 ## 更新-20251015
 
 我的 rCore-N 成功运行[对应 commit](https://github.com/hy-huang20/rCore-N/commit/ed76dd59a7596158954c8b1ae358c400d5eadca6)。
