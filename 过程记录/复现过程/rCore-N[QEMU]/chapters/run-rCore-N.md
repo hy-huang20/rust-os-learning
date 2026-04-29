@@ -32,6 +32,7 @@ rustup component add llvm-tools-preview
 # 输入 tty 验证分别为 /dev/pts/0, /dev/pts/1, /dev/pts/2
 # 在 /dev/pts/0 窗口下输入如下指令启动内核
 LOG=DEBUG just run
+# 重要：在启动内核之前在另外两个窗口运行 rCore-N/sleep.sh
 # 在 /dev/pts/1 窗口中与内核交互
 # >> Rust user shell
 # >>
