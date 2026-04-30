@@ -2,6 +2,22 @@
 
 总体的计划安排 [实时更新中](#20250611)
 
+## 20260430
+
+### 进度
+
+||任务|状态|备注|
+|---|---|---|---|
+|1|[rCore-N 异步 timer 开发](https://github.com/hy-huang20/rust-os-learning/issues/21)验收|[已完成](https://github.com/hy-huang20/rust-os-learning/commit/ce299acd8e52a7e7a95f7c91bf49549468ea5484)|<ul><li>qemu 单核程序行为演示没问题</li><li>后续需要通过演示栈的变化证明确实是 future</li></ul>|
+
+### 下周
+
+||计划|备注|
+|---|---|---|
+|1|先写 markdown 论文大纲|<ul><li>已有 embassy, async-uart-driver 代码分析</li><li>自己实现的 rcoren 异步 timer 原理说明</li></ul>|
+|2|rCore-N 异步 timer|演示栈的变化说明确实是 future|
+|3|串口|放在论文大纲之后完成|
+
 ## 20260427
 
 ### 进度
