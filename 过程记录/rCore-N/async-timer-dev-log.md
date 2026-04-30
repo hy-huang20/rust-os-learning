@@ -6,6 +6,231 @@
 
 记录追踪开发过程中的想法和实现过程，可能会频繁修改，且**不能**保证所有历史内容的正确性。更新中...
 
+## 20260430
+
+### 单核只跑 os 时间片
+
+在 justfile 中先将 qemu 设置 -smp 改成 1 在单核上测试。目前看来单核只跑 os 时间片是没有问题的，截取了一部分调试输出，输出大致按照下面这样循环，**符合预期**：
+
+```
+[DEBUG 0]: [EXECUTOR] spawn
+[DEBUG 0]: [EXECUTOR] poll
+[DEBUG 0]: [TASKREF] poll
+[DEBUG 0]: [TIMER] poll
+[DEBUG 0]: [TIMERDRIVER] schedule_wake
+[DEBUG 0]: [QUEUE] schedule_wake
+[DEBUG 0]: [QUEUE] next_expiration
+[DEBUG 0]: queue len: 1
+[DEBUG 0]: timer.at 24381469 now 24273923
+[DEBUG 0]: queue len: 1
+[DEBUG 0]: set 24381469 now 24299104
+[DEBUG 0]: [TIMERDRIVER] schedule_wake end
+[DEBUG 0]: [TIMERDRIVER] on_interrupt
+[DEBUG 0]: [QUEUE] next_expiration
+[DEBUG 0]: queue len: 1
+[DEBUG 0]: timer.at 24381469 now 24387942
+[DEBUG 0]: wake_task
+[DEBUG 0]: queue len: 0
+[DEBUG 0]: set 18446744073709551615 now 24412059       
+[DEBUG 0]: [EXECUTOR] poll
+[DEBUG 0]: [TASKREF] poll
+[DEBUG 0]: [TIMER] poll
+[DEBUG 0]: await end
+[DEBUG 0]: on_timeout end
+[DEBUG 0]: [EXECUTOR] spawn
+```
+
+### 单核跑 os 时间片 + sys_sleep
+
+Commit ID: [eb820a1](https://github.com/hy-huang20/rCore-N/commit/eb820a1e66d5ec4d4fa39dccd90deb541d3abfb0)
+
+基于 async_timer 的 sys_sleep 和用户态对接，在用户态 user_lib 实现了一个 sleep_blocking()，添加了一个用户态测试程序 sleep_blocking.rs 和原有 hello_world_simple.rs 的唯一区别是：忙等的 sleep() 换成了 sleep_blocking() 函数。手动输入，多次运行 sleep_blocking.rs 结果，**符合预期**：
+
+```
+>> Rust user shell
+>> sleep_blocking
+[sleep blocing] from pid: 1
+current time_msec = 3695
+time_msec = 3809 after calling sleep_blocking(period_ms: 100), delta = 114 ms!
+Test sleep blocking passed!
+Shell: Process 1 exited with code 0
+>> sleep_blocking
+[sleep blocing] from pid: 2
+current time_msec = 7382
+time_msec = 7498 after calling sleep_blocking(period_ms: 100), delta = 116 ms!
+Test sleep blocking passed!
+Shell: Process 2 exited with code 0
+>> sleep_blocking
+[sleep blocing] from pid: 3
+current time_msec = 10100
+time_msec = 10215 after calling sleep_blocking(period_ms: 100), delta = 115 ms!
+Test sleep blocking passed!
+Shell: Process 3 exited with code 0
+>> sleep_blocking
+[sleep blocing] from pid: 4
+current time_msec = 12867
+time_msec = 12984 after calling sleep_blocking(period_ms: 100), delta = 117 ms!
+Test sleep blocking passed!
+Shell: Process 4 exited with code 0
+>> sleep_blocking
+[sleep blocing] from pid: 5
+current time_msec = 15745
+time_msec = 15861 after calling sleep_blocking(period_ms: 100), delta = 116 ms!
+Test sleep blocking passed!
+Shell: Process 5 exited with code 0
+```
+
+再添加一个用户态测试程序 sleep_blocking1.rs，里面开 4 个进程跑 sleep_blocking.rs 结果，**符合预期**：
+
+```
+>> Rust user shell
+>> sleep_blocking1
+[sleep blocking 1] from pid: 1
+[sleep blocking] from pid: 2
+current time_msec = 5158
+[sleep blocking] from pid: 3
+current time_msec = 5171
+[sleep blocking] from pid: 4
+current time_msec = 5189
+[sleep blocking] from pid: 5
+current time_msec = 5196
+time_msec = 5272 after calling sleep_blocking(period_ms: 100), delta = 114 ms!
+Test sleep blocking finished!
+time_msec = 5299 after calling sleep_blocking(period_ms: 100), delta = 128 ms!
+Test sleep blocking finished!
+time_msec = 5315 after calling sleep_blocking(period_ms: 100), delta = 119 ms!
+Test sleep blocking finished!
+time_msec = 5317 after calling sleep_blocking(period_ms: 100), delta = 128 ms!
+Test sleep blocking finished!
+[sleep blocking 1] Test sleep blocking 1 finished!
+Shell: Process 1 exited with code 0
+```
+
+### 多核跑 os 时间片 + sys_sleep
+
+将 qemu 的 -smp 设置恢复为 4 再运行 sleep_blocking1.rs 的结果（为了不在 /dev/pts/0 看到密密麻麻的 DEBUG 调试信息，可以运行时改成 LOG=ERROR just run，顺便提一下 log 的几个等级从低到高：ALL, TRACE, DEBUG, INFO, WARN, ERROR, FATAL, OFF）：
+
+```
+>> sleep_blocking1
+[sleep blocking 1] from pid: 2
+[sleep blocking] from pid: 3
+current time_msec = 20900
+[sleep blocking] from pid: 4
+current time_msec = 20905
+[sleep blocking] from pid: 5
+current time_msec = 20909
+[sleep blocking] from pid: 6
+current time_msec = 20915
+time_msec = 21001 after calling sleep_blocking(period_ms: 100), delta = 101 ms!
+Test sleep blocking finished!
+time_msec = 21006 after calling sleep_blocking(period_ms: 100), delta = 101 ms!
+Test sleep blocking finished!
+time_msec = 21011 after calling sleep_blocking(period_ms: 100), delta = 102 ms!
+Test sleep blocking finished!
+time_msec = 21016 after calling sleep_blocking(period_ms: 100), delta = 101 ms!
+Test sleep blocking finished!
+[sleep blocking 1] Test sleep blocking 1 finished!   
+Shell: Process 2 exited with code 0
+```
+
+现在令人在意的是，**log 的输出似乎会影响程序的行为**。如上面设置 LOG=ERROR 可以正常运行，但是如果设置为 LOG=INFO 遇到过内核崩溃（不能稳定触发，有时一切正常），如果保持 LOG=DEBUG 遇到过输出了一会儿卡住不动的情况（卡住的地方只输出了一截内容，且内核输出卡住的时候 Rust user shell 这边也会卡住无法输入字符）。
+
+## 20260429
+
+Commit ID: [509f3e9ccd7d3a569c45c5610000681feb768a64](https://github.com/hy-huang20/rCore-N/commit/509f3e9ccd7d3a569c45c5610000681feb768a64)
+
+在 virtualbox 里面配置 rcoren 环境又折腾了一阵。把 Cargo.lock 也上传到 github，且用 cargo 下载工具时一律指定版本加 --locked，这样也许可以保证下次在别的地方配环境构建时容易些吧。
+
+virtualbox 环境配好了，但是不知道为什么我在 /dev/pts/1 里面的输入完全无法到达内核。
+
+终于发现了，**在 /dev/pts/0 启动内核之前需要在另外两个窗口先跑 rCore-N/sleep.sh（之前一直忘记了）**。这样尝试后 wsl 上可以成功运行用户态程序，但在我的 virtualbox 中，/dev/pts/1 无法接收输入。后续还是在 wsl 上开发吧。看来**不是 rcoren 自己实现的问题**，这之前有关的记录基本可以无视，**不过导致内核崩溃的情况应和这个无关**，令人在意。
+
+在 wsl 上，async_timer 分支，试图输入 hello_world_simple 运行可能会遇到内核崩溃：（目前还不知道稳定触发的方法，有时候还在输入 app 名称还没回车时就会触发，有时候加几条 debug!() 又不触发了。而且异常类型也并不总是长下面这样，还遇到过 StorePageFault）
+
+```
+[ERROR 1]: Unsupported trap Exception(InstructionPageFault)! stval = 0x18, sepc = 0x18, sstatus = Sstatus {
+                                                    bits: 0x101,
+     }, trap frame: TrapContext { x: [0, 18, ffffffffffffed40, 0, 1, 20, 8020ca1c, f0f0f0f0f0f0f0f, 80775680, ffffffffffffee18, 805763f0, 80776060, 0, 807763c0, 4, 6010, 802205b0, 0, 802205b0, 80775690, 5000, 1, 2, 7380, 1, 5040, 8, 18, 807756c0, 80775680, 80775d00, 0], sstatus: Sstatus { bits: 18 }, sepc: 8, kernel_satp: 5040, kernel_sp: 1, trap_handler: 7380 }
+[kernel 1] Panicked at src/trap/mod.rs:233 a trap Exception(InstructionPageFault) from kernel!
+```
+
+hello_world_simple 例子行为很简单，user_lib::sleep 还没有接上 async_timer 实现的 sys_sleep，依然是死循环忙等。所以目前只有 os 时间片在使用 async_timer。代码如下： 
+
+```rust
+use user_lib::{getpid, sleep};
+
+#[no_mangle]
+pub fn main() -> i32 {
+    println!("[hello world] from pid: {}", getpid());
+    sleep(100);
+    0
+}
+```
+
+## 20260428
+
+继续 [20260427](#20260427) 的问题。利用这个 bug，冗余输入 hhhhhheelllllooo__wwoorlllllldd，终于成功运行了 hello_world！
+
+有时候会看见形如这样的输出：
+
+```
+hhhhhellloo_wollllld: command not found
+```
+
+里面的字符正好是那些漏掉的字符。猜想是这部分字符并没有经 /dev/pts/1 给 rcoren 而是给了 wsl 从而输出 command not found 这样的内容。
+
+**由于原来有在 wsl 中成功运行 uart_benchmark 用户程序的[记录](https://github.com/hy-huang20/rust-os-learning/blob/main/%E8%BF%87%E7%A8%8B%E8%AE%B0%E5%BD%95/%E5%A4%8D%E7%8E%B0%E8%BF%87%E7%A8%8B/rCore-N%5BQEMU%5D/chapters/run-rCore-N.md)，现在运行用户程序出了问题，也有可能是因为本地的 wsl 出问题了。之前电脑 windows 系统因为蓝屏无法启动，使用 u 盘启动盘重装过。**
+
+下一步的想法是把 rcoren 放到 virtualbox linux 虚拟机中去运行，看是不是会出现一样的丢字符的 bug。
+
+## 20260427
+
+这之前的记录基本可以无视。没有将 trap_handler 实现为 async 函数。
+
+### 1. 解决编译错误
+
+Commit ID: [2d6752e45b2a63a7116005e5418f552cdf3d7a29](https://github.com/hy-huang20/rCore-N/commit/2d6752e45b2a63a7116005e5418f552cdf3d7a29)
+
+解决了编译错误。内核能启动了。
+
+此时并没有用实现的 sys_sleep 提供给用户态，用户态的 sleep 仍然是那个忙等。
+
+但是试图运行一个 hello_world_simple 测例时内核崩溃：
+
+**程序提示信息**
+
+```
+>> hello_world_simple
+Error when executing!
+Shell: Process 1 exited with code -4
+>> 
+```
+
+**内核提示信息**
+
+```
+[DEBUG 0]: run_tasks
+[DEBUG 0]: Fork start
+[DEBUG 0]: forked task cx ptr: 0xffffffffffff9f58
+[DEBUG 0]: new_task 1 via fork
+[DEBUG 2]: EXEC eo_ordmple
+[ WARN 2]: exec failed!
+[ INFO 1]: pid: 1 exited with code -4, time intr: 1, cycle count: 20761282
+[ERROR 1]: Unsupported trap Exception(IllegalInstruction)! stval = 0x0, sepc = 0x8020ee94, sstatus = Sstatus { bits: 0x101, }, trap frame: TrapContext { x: [0, 8020ee94, ffffffffffffee10, 0, 1, 20, 8020c998, f0f0f0f0f0f0f0f, fffffffffffff000, 7340, 80776020, 1, 1, 80776018, 131ba22, 4db0, 802205b0, 0, c, 5030, 5000, 1, 2, 14eb0, d, 5040, 8, 18, 80775640, 807766a8, 80775600, 0], sstatus: Sstatus { bits: 8020ee94 }, sepc: 0, kernel_satp: 0, kernel_sp: 0, trap_handler: 0 }
+[kernel 1] Panicked at src/trap/mod.rs:233 a trap Exception(IllegalInstruction) from kernel!
+```
+
+综上目前发现的问题：
+
+- 我键盘输入的是 hello_world_simple，但是 os 调试信息中输出的却是 `EXEC eo_ordmple`，看起来像是随机丢失了一些字母
+  - 试了几次发现这个 bug 稳定触发
+- 内核因为不明原因崩溃了，看提示信息是跳转到 trap_from_kernel 了，而且错误原因是 IllegalInstruction 异常
+  - 试了几次发现并不一定输入某个执行用户 app 后马上就崩溃，但每次确实都会因为一些目前不明的原因崩溃
+
+### 2. rcoren 实现本来就有 bug?
+
+我切换到了内核能运行的最早的版本 [e45c3c1](https://github.com/hy-huang20/rCore-N/commit/e45c3c12579d4a79feefeb2d4381529106a4aee3)，随机丢字符串的问题还是能稳定触发，看来是 rcoren 本身的实现有问题。
+
 ## 20260128
 
 组会后记录。从向老师那里确认：
