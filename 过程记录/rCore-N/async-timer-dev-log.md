@@ -20,6 +20,8 @@ rcoren 每一个 hart 都有自己独立的 idle 进程，但是在 idle 进程�
 
 现在并不能确定，在 supervisor timer 中断上下文中试图获取 TASK_POOL 锁，是内核崩溃 bug 的原因，但算是可能的原因之一。
 
+同时发现，使用 async_timer 替代原有 timer 实现后 uart_benchmark 测例出问题了。单核 -smp 1 输出不对，多核 -smp 4 会出现内核崩溃。
+
 ## 20260430
 
 ### 单核只跑 os 时间片
