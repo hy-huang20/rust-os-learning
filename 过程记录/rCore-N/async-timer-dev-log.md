@@ -6,6 +6,20 @@
 
 记录追踪开发过程中的想法和实现过程，可能会频繁修改，且**不能**保证所有历史内容的正确性。更新中...
 
+## 20260502
+
+rcoren 每一个 hart 都有自己独立的 idle 进程，但是在 idle 进程中 fetch_task() 时 4 个 hart 都会从同一个 TASK_POOL 里面的同一个 TaskManager 里面的同一个 ready_queue 里面取 TaskStatus::Ready 的任务来运行。所以 fetch_task() 对 TASK_POOL 的访问上了锁 .lock()。  
+
+在 add_task() 中，在获取 TASK_POOL 锁前加上一条 debug!() 日志输出，运行，输出了一会就卡住了，Rust user shell 也卡住无法输入。猜测是 debug!() 遇到死锁。
+
+之前发现 rcoren 的实现硬生生将 suspend_current_and_run_next() 的逻辑拆分成了两段，在中断上下文里只负责 schedule 到 idle 进程，然后在 idle 进程中负责修改任务状态以及 add_task() 到 ready_queue 中。而现在的实现将上面两部分合到一个函数中，并在中断上下文就调用这个合并的函数（rcore 做法）。因为 add_task() fetch_task() 这些都需要获取 TASK_POOL 的锁，在原来的实现中这两个函数也都是仅在 idle 进程调用，所以我猜想**也许原作者不希望在 rcoren 中断上下文中持有 TASK_POOL 锁？**
+
+怎么改回去呢？sys_sleep 设置的 timer 回调里面那个 add_task(tcb) 似乎怎么也没法避免？借助 TaskPool 的接口？TaskPool::wake() 不得不放到中断上下文去，否则中断到来如果仅仅是修改 TaskStatus 的话，sleep 就不知道要等到猴年马月了。但是调用 TaskPool::wake() 又必须先获取 TASK_POOL 锁。
+
+既然这么麻烦，也许一定程度上解释了为什么 rcoren 原作者把 sleep 实现为忙等，把 suspend_current_and_run_next() 别扭地拆成两部分了。
+
+现在并不能确定，在 supervisor timer 中断上下文中试图获取 TASK_POOL 锁，是内核崩溃 bug 的原因，但算是可能的原因之一。
+
 ## 20260430
 
 ### 单核只跑 os 时间片
