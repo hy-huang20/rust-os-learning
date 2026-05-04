@@ -6,6 +6,91 @@
 
 记录追踪开发过程中的想法和实现过程，可能会频繁修改，且**不能**保证所有历史内容的正确性。更新中...
 
+## 20260504
+
+```
+[ERROR 1]: Unsupported trap Exception(InstructionPageFault)! stval = 0x18, sepc = 0x18, sstatus = Sstatus {
+                                                    bits: 0x101,
+     }, trap frame: TrapContext { x: [0, 18, ffffffffffffed40, 0, 1, 20, 8020ca1c, f0f0f0f0f0f0f0f, 80775680, ffffffffffffee18, 805763f0, 80776060, 0, 807763c0, 4, 6010, 802205b0, 0, 802205b0, 80775690, 5000, 1, 2, 7380, 1, 5040, 8, 18, 807756c0, 80775680, 80775d00, 0], sstatus: Sstatus { bits: 18 }, sepc: 8, kernel_satp: 5040, kernel_sp: 1, trap_handler: 7380 }
+[kernel 1] Panicked at src/trap/mod.rs:233 a trap Exception(InstructionPageFault) from kernel!
+```
+
+目前对报错的分析：
+
+- 内核崩溃：trap_from_kernel
+- 报 InstructionPageFault 时 sepc 为 0x18，说明试图去执行内核虚拟地址空间 0x18 处的指令
+- ra 寄存器也恰好为 0x18
+
+寄存器的值：
+
+|CSR|值|备注|
+|---|---|---|
+|scause||InstructionPageFault|
+|stval|0x18||
+|sepc|0x18|记录出问题的指令地址|
+|sstatus|0x101|bits: usize|
+
+|通用寄存器|值|备注|
+|---|---|---|
+|zero|0x0|恒 0|
+|ra|0x18|返回地址。正常不会落到如此低地址|
+|sp|0xffffffffffffed40|栈指针。内核地址空间没有 trap context 页。所以这个地址应该位于 pid 0 的内核栈内|
+|gp|0x0|被用来存储 pid。pid 从 0 开始分配，idle 进程没有 tcb 不对应 pid，看来对应 initproc 进程|
+|tp|0x1|hart id。对应输出 [ERROR 1] 的 hart|
+|t0|0x20||
+|t1|0x8020ca1c||
+|t2|0xf0f0f0f0f0f0f0f||
+|s0|0x80775680||
+|s1|0xffffffffffffee18||
+|a0|0x805763f0|函数参数|
+|a1|0x80776060||
+|a2|0x0||
+|a3|0x807763c0||
+|a4|0x4||
+|a5|0x6010||
+|a6|0x802205b0||
+|a7|0x0||
+|s2|0x802205b0||
+|s3|0x80775690||
+|s4|0x5000||
+|s5|0x1||
+|s6|0x2||
+|s7|0x7380||
+|s8|0x1||
+|s9|0x5040||
+|s10|0x8||
+|s11|0x18||
+|t3|0x807756c0||
+|t4|0x80775680||
+|t5|0x80775d00||
+|t6|0x0||
+
+如果去看 kernelvec 的代码，这之后的信息都是无效的，也就是这里的 TrapContext 只有 x 字段的值是有效的。
+
+推测是内核中某个函数试图返回时发现 ra 为 0x18 于是跳转到 0x18 去执行，而 0x18 是内核虚拟地址空间的无意义地址，触发了 InstructionPageFault
+
+trap from kernel 来源有两处，一处是 trap_handler 函数里面触发，一处是 idle 进程里面触发。后者应该不可能，因为如果是这样，sp 则应该位于 boot_stack，而不是位于 pid 0 内核栈。所以这里的 trap from kernel 应该是 trap_handler 函数里面的异常。
+
+trap_handler 函数里面的异常来源也有两处，一处是在执行用户系统调用时出现异常，一处是在处理中断时出现异常。
+
+将 async_timer 切换回 rcoren 原来的 timer 仍然可能遇到内核崩溃。要不就是 suspend_current_and_run_next 两段和一段的锅？中断上下文不应该持有 TASK_POOL 锁的锅？
+
+git 切换到最初能正常运行且未改动的状态：
+
+```bash
+git checkout embassy-into-rcoren
+```
+
+此状态不会遇到内核崩溃，且 uart_benchmark 正常运行输出均为 0 bytes error。基于该状态只改动 suspend_current_and_run_next 将两段逻辑合为一段，看看会不会遇到内核崩溃或者 uart_benchmark 异常。
+
+**不幸的是，结果确实印证了我的猜测**。只是按照上述改动了 suspend_current_and_run_next，就出现了之前遇到的一切问题。运行 hello_world_simple 或 uart_benchmark 均会导致内核崩溃；有时出现未有任何操作内核便崩溃的情况。
+
+**目前结论：不要试图在中断上下文中获取 TASK_POOL 锁**。
+
+如果禁止在中断上下文获取 TASK_POOL 锁的话，目前 sys_sleep 实现似乎难以改动。可能要修改 sys_sleep 的原理？比如改成类似于一个 while 循环套 suspend_current_and_run_next 的实现，而不是引入新的 block_current_and_run_next？这样就可以保留原来 rcoren 的设计，不在中断上下文获取 TASK_POOL 锁。
+
+目前想的 sys_sleep 大概的写法：使用 async_timer 设置一个 timer，引入一个标志位，初值 true，作为 sys_sleep 中 while 的循环条件；while 中跑 rcoren 原 suspend_current_and_run_next 实现；设置的 timer 回调中修改标志位值为 false 打破 while 循环，sys_sleep 结束。
+
 ## 20260502
 
 rcoren 每一个 hart 都有自己独立的 idle 进程，但是在 idle 进程中 fetch_task() 时 4 个 hart 都会从同一个 TASK_POOL 里面的同一个 TaskManager 里面的同一个 ready_queue 里面取 TaskStatus::Ready 的任务来运行。所以 fetch_task() 对 TASK_POOL 的访问上了锁 .lock()。  
