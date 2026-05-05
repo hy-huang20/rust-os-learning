@@ -6,6 +6,18 @@
 
 记录追踪开发过程中的想法和实现过程，可能会频繁修改，且**不能**保证所有历史内容的正确性。更新中...
 
+## 20260505
+
+Commit ID: [f79afce](https://github.com/hy-huang20/rCore-N/commit/f79afce991370d40c8574bcff33edd56802aff45)
+
+将 suspend_current_and_run_next() 改成了原 rcoren 逻辑，去掉 block_current_and_run_next()，保证不在中断上下文中试图获取 TASK_POOL 锁，**确实解决了内核崩溃问题**，但是 uart_benchmark 运行输出提示的 error bytes 令人在意。
+
+目前没有解决 uart_benchmark 出现的问题。
+
+突然发现曾经运行 uart_benchmark 的记录中，uart_benchmark 的输出结果也是[有问题的](http://github.com/hy-huang20/rust-os-learning/blob/main/%E8%BF%87%E7%A8%8B%E8%AE%B0%E5%BD%95/%E5%A4%8D%E7%8E%B0%E8%BF%87%E7%A8%8B/rCore-N%5BQEMU%5D/chapters/run-rCore-N.md)。也就是说其实还没有真正成功运行过 uart_benchmark ...
+
+可能需要先学习一下 uart_benchmark 的原理。
+
 ## 20260504
 
 ```
