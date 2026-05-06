@@ -6,6 +6,16 @@
 
 记录追踪开发过程中的想法和实现过程，可能会频繁修改，且**不能**保证所有历史内容的正确性。更新中...
 
+## 20260506
+
+目前的几个任务：
+
+|任务|状态|备注|
+|---|---|---|
+|[uart_benchmark 学习](https://github.com/hy-huang20/rust-os-learning/issues/28)|[进行中](https://github.com/hy-huang20/rust-os-learning/commit/c5a87040adc06ab69bb6c7c3b15cd72a1e28aa78)|目前运行 uart_benchmark 还有问题|
+|rcoren 异步 timer 验证|未开始|当一轮 executor.poll() 下来 Poll::Pending 的任务的 poll 栈帧会被回收并且状态存到堆上（表现为 sp 退回到 executor.poll() 函数），而不是像线程那样直到任务执行完成前需要维持线程栈|
+|写论文大纲|未开始|按照原计划这周就得开始写了，先写 embassy 介绍，rcoren timer 这部分，写成一个 markdown|
+
 ## 20260505
 
 Commit ID: [f79afce](https://github.com/hy-huang20/rCore-N/commit/f79afce991370d40c8574bcff33edd56802aff45)
