@@ -133,7 +133,7 @@ if irq_to_serial_id(UART_IRQN.load(Relaxed)) == 3 {
 
 #### KERNEL_MODE: kernel_driver_test()
 
-使用 os 提供的 `sys_read` `sys_write` 系统调用读写串口。读串口 `rx_fd` 和写串口 `tx_fd` 是同一个 fd, 但是由于 `UART` 是**全双工**的，所以即使读写同一个 fd, 读和写也是相互独立互不影响的。
+使用 os 提供的 `sys_read` `sys_write` 系统调用读写串口，最终会走到 os 的 BufferedSerial。读串口 `rx_fd` 和写串口 `tx_fd` 是同一个 fd, 但是由于 `UART` 是**全双工**的，所以即使读写同一个 fd, 读和写也是相互独立互不影响的。
 
 使用 `uart_load.rs` 进行测试一般是 spawn 两个 `uart_load` 任务，并通过 `send_msg()` 设置两个任务的 `MODE` 为一个 `UART3` 一个 `UART4`。
 
