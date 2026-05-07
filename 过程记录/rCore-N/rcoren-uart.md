@@ -48,6 +48,10 @@ TODO
 
 作用是提供了 `KERNEL_MODE`, `POLLING_MODE`, `INTR_MODE`, `ASYNC_MODE` 4 种模式进行测试，作为 **I/O 压力测试**任务跑满 UART。
 
+**看串口是否工作正常应主要看 error bytes 是否为 0**。对于同一个 uart_load 进程，其接收字节数和发送字节数不相等应是正常的。因为同一个 uart_load 进程的收与发，对应的是两条方向相反且逻辑上独立的数据流。
+
+而理论上，对于 UART3 和 UART4，应有 UART3 发出字节数等于 UART4 接收字节数，UART4 发出字节数等于 UART3 接受字节数。因为接收字节数在理论上确实应该等于对端发出的字节数。但是在当前 uart_load.rs 的粗略实现下，两者存在不相等的情况也是正常的。
+
 ```rust
 bitflags! {
     struct UartLoadConfig: u32 {
