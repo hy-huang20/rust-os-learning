@@ -167,6 +167,11 @@ let time_us = get_time() * 1000;
 set_timer(time_us + TEST_TIME_US);
 while !(IS_TIMEOUT.load(Relaxed)) {
     // 开测 ...
+    // write()
+    // read()
+    // 读逻辑实现为可以有限地处理串口丢字节问题
+    // 如果是重复字节/多了字节/字节被污染问题
+    // 这里的逻辑就处理不了了
 }
 ```
 
