@@ -6,6 +6,57 @@
 
 记录追踪开发过程中的想法和实现过程，可能会频繁修改，且**不能**保证所有历史内容的正确性。更新中...
 
+## 20260507
+
+Commit ID: [6d93efe](https://github.com/hy-huang20/rCore-N/commit/6d93efe27b9eade19cde8bfa2ba697710a9c10db)
+
+之前注意到 User mode async driver benchmark 的 sent bytes 一直是 0，检查发现我仓库里的 uart_load.rs 实现有些问题，user_async_test() 里面 executor::run_until_idle() 返回值用得不对。于是去 rcoren 原作者仓库复制了最新的 uart_load.rs 代码版本。运行结果：
+
+```
+>> uart_benchmark
+[uart benchmark] Kernel mode driver benchmark begins.
+[uart load] trap init result: 0xffffffffffffd000, now waiting for config init...        
+[uart load] trap init result: 0xffffffffffffd000, now waiting for config init...        
+Test finished, 17378 bytes sent, 13152 bytes received, 56158 bytes error.
+Test finished, 16367 bytes sent, 11249 bytes received, 21408 bytes error.
+[uart benchmark] Kernel mode driver benchmark finished.
+[uart benchmark] User mode polling driver benchmark begins.
+[uart load] trap init result: 0xffffffffffffd000, now waiting for config init...
+[uart load] trap init result: 0xffffffffffffd000, now waiting for config init...        
+[uart load] Polling mode, claim result: [0uartx load] Polling mode, claim result: 0x10001000
+ 0005000
+[uart load] err pos: 1, empty read: 3900
+Test finished, 19050 bytes sent, 15150 bytes received, 148095 bytes error.
+[uart load] err pos: 1, empty read: 4288
+Test finished, 20200 bytes sent, 15912 bytes received, 155773 bytes error.
+[uart benchmark] User mode polling driver benchmark finished.
+[uart benchmark] User mode interrupt driver 
+benchmark begin.
+[uart load] trap init result: 0xffffffffffffd000, now waiting for config init...        
+[uart load] trap init result: 0xffffffffffffd000, now waiting for config init...        
+[uart load] Interrupt mode, claim result: 0x10004000, enable res: 0x0
+[uart load] Interrupt mode, claim result: 0x10005000, enable res: 0x0
+[uart load] Intr count: 673, Tx: 340, Rx: 333, err pos: 85
+Test finished, 4250 bytes sent, 4900 bytes received, 9111 bytes error.
+[uart load] Intr count: 653, Tx: 328, Rx: 325, err pos: 108
+Test finished, 4100 bytes sent, 4850 bytes received, 12837 bytes error.
+[uart benchmark] User mode interrupt driver 
+benchmark finished.
+[uart benchmark] User mode async driver benchmark begin.
+[uart load] trap init result: 0xffffffffffffd000, now waiting for config init...        
+[uart load] trap init result: 0xffffffffffffd000, now waiting for config init...        
+[uart load] Async mode, claim result: 0x10004000, enable res: 0x0
+[uart load] Async mode, claim result: 0x10005000, enable res: 0x0
+[uart load] Intr count: 3787, Tx: 3780, Rx: 7, err pos: -1
+Test finished, 59940 bytes sent, 86 bytes received, 0 bytes error.
+[uart load] Intr count: 3599, Tx: 3591, Rx: 8, err pos: -1
+Test finished, 56943 bytes sent, 94 bytes received, 0 bytes error.
+[uart benchmark] User mode async driver benchmark finished.
+Shell: Process 1 exited with code 0
+```
+
+目前发现只有 user_async_test() 能够做到 0 bytes error，不知道其它三种模式有什么问题。既然有模式能够做到 0 bytes error，我的理解是可以认为串口是没问题的，只是其它三种实现在目前情景下容易出现数据错误。
+
 ## 20260506
 
 目前的几个任务：
