@@ -14,7 +14,7 @@
 
 ||计划|备注|
 |---|---|---|
-|1|markdown 论文大纲和写作安排|<ul><li>已有 embassy, async-uart-driver 代码分析</li><li>自己实现的 rcoren 异步 timer 原理说明</li><li>目前是第十二周周一，毕设群里通知论文查重在第十四周周五左右</li></ul>|
+|1|markdown 论文大纲和写作安排|<ul><li>已有 embassy, async-uart-driver 代码分析</li><li>自己实现的 rcoren 异步 timer 原理说明</li><li>目前是第十二周周一，毕设群里通知论文查重在第十四周周五左右</li><li>明天形成论文大纲</li></ul>|
 |2|rCore-N 异步 timer|<ul><li>演示栈的变化说明确实是 future</li><li>演示：当叶子 Future::poll() 返回 Poll::Pending 后，整条 poll 调用链会逐层返回，所有中间 poll 函数的栈帧都会被弹出，sp 最终回到 executor 调用 poll 之后的栈位置</li></ul>|
 |3|串口|目前 rCore-N 上的 uart_benchmark 行为正常，后续应该可以直接拿林晨的 async-uart-driver 对接了|
 
