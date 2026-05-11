@@ -2,6 +2,22 @@
 
 总体的计划安排 [实时更新中](#20250611)
 
+## 20260511
+
+### 进度
+
+||任务|状态|备注|
+|---|---|---|---|
+|1|[rCore-N 异步 timer 开发](https://github.com/hy-huang20/rust-os-learning/issues/21)|debug 完成|<ul><li>解决了之前出现的内核崩溃问题</li><li>解决了 uart_benchmark 测试结果异常的问题</li></ul>|
+
+### 下周
+
+||计划|备注|
+|---|---|---|
+|1|markdown 论文大纲和写作安排|<ul><li>已有 embassy, async-uart-driver 代码分析</li><li>自己实现的 rcoren 异步 timer 原理说明</li><li>目前是第十二周周一，毕设群里通知论文查重在第十四周周五左右</li></ul>|
+|2|rCore-N 异步 timer|<ul><li>演示栈的变化说明确实是 future</li><li>演示：当叶子 Future::poll() 返回 Poll::Pending 后，整条 poll 调用链会逐层返回，所有中间 poll 函数的栈帧都会被弹出，sp 最终回到 executor 调用 poll 之后的栈位置</li></ul>|
+|3|串口|目前 rCore-N 上的 uart_benchmark 行为正常，后续应该可以直接拿林晨的 async-uart-driver 对接了|
+
 ## 20260430
 
 ### 进度
