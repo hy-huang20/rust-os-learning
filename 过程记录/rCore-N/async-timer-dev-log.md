@@ -55,7 +55,7 @@ Test finished, 56943 bytes sent, 94 bytes received, 0 bytes error.
 Shell: Process 1 exited with code 0
 ```
 
-目前发现只有 user_async_test() 能够做到 0 bytes error，不知道其它三种模式有什么问题。既然有模式能够做到 0 bytes error，我的理解是可以认为串口是没问题的，只是其它三种实现在目前情景下容易出现数据错误。
+目前发现只有 user_async_test() 能够做到 0 bytes error（貌似也不是百分百），不知道其它三种模式有什么问题。既然有模式能够做到 0 bytes error，我的理解是可以认为串口是没问题的，只是其它三种实现在目前情景下容易出现数据错误。
 
 ## 20260506
 
